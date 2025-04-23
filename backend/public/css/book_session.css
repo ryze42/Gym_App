@@ -1,0 +1,164 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", sans-serif;
+}
+
+body {
+    background-color: #232323;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.header-title {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 600;
+    margin: 20px 0;
+}
+
+.booking-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin-top: 60px;
+}
+
+.session-card {
+    background-color: #fff;
+    color: #232323;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.cancel-button {
+    align-self: flex-start;
+    background-color: transparent;
+    color: #c5003c;
+    border: 2px solid #c5003c;
+    padding: 10px 16px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.cancel-button:hover {
+    background-color: #c5003c;
+    color: white;
+}
+
+.booking-filter {
+    margin: 20px 0;
+    width: 100%;
+}
+
+.booking-filter label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.booking-filter select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.booking-filter select:focus {
+    border-color: #1e90ff;
+    outline: none;
+}
+
+p { 
+    padding: 3px;
+}
+
+.book-session-button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background-color: #232323;
+    color: white;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 2px;
+}
+
+.book-session-button:hover {
+    background-color: #1e90ff;
+}
+
+label {
+    display: block;
+    margin-top: 15px; 
+}
+  
+#sessionSelect {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0 20px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    font-size: 16px;
+    color: #232323;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+  
+#sessionSelect:focus {
+    border-color: #1e90ff;
+    outline: none;
+}
+  
+
+@media (max-width: 600px) {
+    .session-card {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .book-session-button {
+        font-size: 16px;
+        padding: 10px;
+        margin-top: 10px;
+    }
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Bookings</title>
+  <link rel="stylesheet" href="/css/my_bookings.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css"> 
+</head>
+<body>
+  <main>
+    <%- include("partials/header.ejs") %>
+    <h1 class="header-title">My Bookings</h1>
+
+    <div class="filter-container">
+      <label for="booking-filter">Filter by status:</label>
+      <select id="booking-filter" onchange="filterBookings()">
+        <option value="all">All</option>
+        <option value="active">Active</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+
+      <label for="hide-past-sessions" style="margin-left: 20px;">
+        <input type="checkbox" id="hide-past-sessions" checked onchange="filterBookings()">
+        Hide Past Bookings
+      </label>
+    </div>
+    
+    <div class="bookings-container">
+      <% if(bookings && bookings.length > 0) { %>
+        <% bookings.forEach(function(bookingData) { %>
+          <% 
+            const booking = bookingData.booking;
+            const session = bookingData.session;
+            const trainer = bookingData.trainer;
+            const activity = bookingData.activity;
+            const location = bookingData.location;
+            const sessionDateISO = new Date(session.date).toISOString();
+          %>
+          <div class="booking-card <%= booking.status === 'cancelled' ? 'cancelled-booking' : '' %>" 
+               data-session-date="<%= sessionDateISO %>">
+            <h3><%= activity.name %></h3>
+            <p>Date: <%= new Date(session.date).toLocaleDateString() %></p>
+            <p>Time: <%= session.start_time %></p>
+            <p>Address: <%= location.address %>, <%= location.name %></p>
+            <p>Trainer: <%= trainer.first_name %> <%= trainer.last_name %></p>
+            <p>Status: <%= booking.status %></p>
+            <% if (booking.status === 'active') { %>
+              <form action="/booking/delete/<%= booking.id %>" method="POST" style="display:inline;">
+                <button type="submit" class="cancel-booking-btn" onclick="return confirm('Are you sure you want to cancel this booking?');">
+                  Cancel Booking
+                </button>
+              </form>
+            <% } else { %>
+              <p class="cancelled-text">( This booking has been cancelled )</p>
+            <% } %>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p class="no-bookings">You have no bookings.</p>
+      <% } %>
+    </div>
+
+    <script>
+      function filterBookings() {
+        const filterValue = document.getElementById("booking-filter").value;
+        const hidePast = document.getElementById("hide-past-sessions").checked;
+        const bookingCards = document.querySelectorAll(".booking-card");
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        bookingCards.forEach(function(card) {
+          const sessionDate = new Date(card.getAttribute("data-session-date"));
+          sessionDate.setHours(0, 0, 0, 0);
+
+          const isPastSession = sessionDate < today;
+          
+          const isActive = !card.classList.contains("cancelled-booking");
+          let statusMatch = false;
+          if (filterValue === "all") {
+            statusMatch = true;
+          } else if (filterValue === "active" && isActive) {
+            statusMatch = true;
+          } else if (filterValue === "cancelled" && !isActive) {
+            statusMatch = true;
+          }
+          
+          if (hidePast && isPastSession) {
+            card.style.display = "none";
+          } else if (statusMatch) {
+            card.style.display = "block";
+          } else {
+            card.style.display = "none";
+          }
+        });
+      }
+      window.addEventListener("DOMContentLoaded", filterBookings);
+    </script>
+
+    <%- include("partials/footer.ejs") %>
+  </main>
+</body>
+</html>

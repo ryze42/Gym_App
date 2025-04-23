@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= "Session Management" %></title>
+  <link rel="stylesheet" href="/css/crud_sessions.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css"> 
+</head>
+<body>
+  <main>
+    <%- include("partials/header.ejs") %>
+    <div class="container">
+      <h1 class="header-title">Manage Sessions</h1>
+      
+      <div class="filter-container">
+        <div class="date-filter">
+          <label for="dateFrom">Date From:</label>
+          <input type="date" id="dateFrom" name="dateFrom">
+          
+          <label for="dateTo">Date To:</label>
+          <input type="date" id="dateTo" name="dateTo">
+          
+          <div class="date-presets">
+            <button type="button" class="preset-btn" data-preset="today">Today</button>
+            <button type="button" class="preset-btn" data-preset="week">This Week</button>
+            <button type="button" class="preset-btn" data-preset="month">This Month</button>
+            <button type="button" class="preset-btn" data-preset="year">This Year</button>
+          </div>
+          
+          <div class="filter-actions">
+            <button type="button" id="applyDateFilter" class="filter-btn">Apply Date Filter</button>
+            <button type="button" id="clearDateFilter" class="clear-filter-btn">Clear Date Filter</button>
+          </div>
+          
+          <div id="activeFilterIndicator" class="active-filter-indicator"></div>
+        </div>
+      
+        <div class="trainer-filter">
+          <label for="trainerFilter">Filter by Trainer:</label>
+          <select id="trainerFilter">
+            <option value="all">All Trainers</option>
+            <% 
+              const uniqueTrainers = [];
+              const trainerIds = new Set();
+              if (sessions && sessions.length) {
+                sessions.forEach(item => {
+                  const trainer = item.trainer;
+                  if (trainer && trainer.id && !trainerIds.has(trainer.id)) {
+                    trainerIds.add(trainer.id);
+                    uniqueTrainers.push(trainer);
+                  }
+                });
+                uniqueTrainers.forEach(trainer => { 
+            %>
+              <option value="<%= trainer.id %>"><%= trainer.first_name + " " + trainer.last_name %></option>
+            <% 
+                });
+              } 
+            %>
+          </select>
+        </div>
+      </div>
+      <% 
+        let currentSession = selectedSession.session || selectedSession;
+      %>
+      <div class="content">
+        <div class="form-container">
+          <form action="/session/<%= currentSession.id ? currentSession.id : '' %>" method="POST">
+            <% if (currentSession && currentSession.id) { %>
+              <input type="hidden" name="action" value="update">
+            <% } else { %>
+              <input type="hidden" name="action" value="create">
+            <% } %>
+            
+            <label for="activity_id">Activity</label>
+            <select id="activity_id" name="activity_id">
+              <option value="" disabled selected>Select Activity</option>
+              <% if (activities && activities.length) { %>
+                <% activities.forEach(activity => { %>
+                  <option value="<%= activity.id %>" <%= selectedSession.session && selectedSession.session.activity_id == activity.id ? 'selected' : '' %>>
+                    <%= activity.name %>
+                  </option>
+                <% }); %>
+              <% } else { %>
+                <option>No activities available</option>
+              <% } %>
+            </select>
+
+            <label for="date">Date</label>
+            <input type="date" id="date" name="date" placeholder="Enter Date" value="<%= currentSession.date ? new Date(new Date(currentSession.date).getTime() 
+            - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10) : '' %>">
+
+            <label for="start_time">Start Time</label>
+            <input type="time" id="start_time" name="start_time" placeholder="Enter Start Time" value="<%= currentSession.start_time?.substring(0,5) || '' %>">
+
+            <label for="location_id">Location</label>
+            <select id="location_id" name="location_id">
+              <option value="" disabled selected>Select Location</option>
+              <% if (locations && locations.length) { %>
+                <% locations.forEach(location => { %>
+                  <option value="<%= location.id %>" <%= selectedSession.session && selectedSession.session.location_id == location.id ? 'selected' : '' %>>
+                    <%= location.name %>
+                  </option>
+                <% }); %>
+              <% } else { %>
+                <option>No locations available</option>
+              <% } %>
+            </select>
+  
+            <label for="trainer_id">Trainer</label>
+            <select id="trainer_id" name="trainer_id">
+              <option value="" disabled selected>Select Trainer</option>
+              <% if (trainers && trainers.length) { %>
+                <% trainers.forEach(trainer => { %>
+                  <option value="<%= trainer.id %>" <%= selectedSession.session && selectedSession.session.trainer_id == trainer.id ? 'selected' : '' %>>
+                    <%= trainer.first_name + " " + trainer.last_name %>
+                  </option>
+                <% }); %>
+              <% } else { %>
+                <option>No trainers available</option>
+              <% } %>
+            </select>
+  
+            <div class="button-container">
+              <button type="button" class="clear-btn" onclick="window.location.href='/session'">Clear</button>
+              <button type="submit" class="submit-btn">Create New Session / Edit</button>
+            </div>
+          </form>
+        </div>
+                        
+        <div class="session-list">
+          <% if (sessions && sessions.length > 0) { %>
+            <% sessions.forEach(item => { 
+                 const sess = item.session;
+                 const trainer = item.trainer;
+                 const activity = item.activity;
+                 const location = item.location;
+            %>
+              <div class="session-card" data-trainer-id="<%= trainer ? trainer.id : sess.trainer_id %>">
+                <div class="session-text">
+                  <p class="session-id">Session ID: <%= sess.id %></p>
+                  <p class="session-activity">Activity: <span><%= activity ? activity.name : sess.activity_id %></span></p>
+                  <p class="session-date">Date: <span><%= new Date(sess.date).toDateString() %></span></p>
+                  <p class="session-start-time">Start Time: <span><%= sess.start_time %></span></p>
+                  <p class="session-location">Location: <span><%= location ? location.name : sess.location_id %></span></p>
+                  <p class="session-trainer">Trainer: <span><%= trainer ? (trainer.first_name + " " + trainer.last_name) : sess.trainer_id %></span></p>
+                </div>
+                <div class="session-actions">
+                  <a href="/session/<%= sess.id %>" class="edit-btn">Edit</a>
+                  <form action="/session/<%= sess.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this session?');">
+                    <input type="hidden" name="action" value="delete">                                
+                    <button type="submit" class="delete-btn">❌</button>                                        
+                  </form>                                    
+                </div>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <p class="no-sessions">No sessions available.</p>
+          <% } %>
+        </div>
+        <script>  
+            document.addEventListener('DOMContentLoaded', function() {
+              const dateFrom = document.getElementById('dateFrom');
+              const dateTo = document.getElementById('dateTo');
+              const applyDateFilter = document.getElementById('applyDateFilter');
+              const clearDateFilter = document.getElementById('clearDateFilter');
+              const presetButtons = document.querySelectorAll('.preset-btn');
+              const activeFilterIndicator = document.getElementById('activeFilterIndicator');
+              const sessionCards = document.querySelectorAll('.session-card');
+              const trainerFilter = document.getElementById('trainerFilter');
+              
+              const today = new Date();
+              
+              function setToday() {
+                dateFrom.valueAsDate = new Date();
+                dateTo.valueAsDate = new Date();
+              }
+              
+              function setThisWeek() {
+                const fromDate = new Date(today);
+                const toDate = new Date(today);
+                toDate.setDate(today.getDate() + 6);
+                dateFrom.valueAsDate = fromDate;
+                dateTo.valueAsDate = toDate;
+              }
+              
+              function setThisMonth() {
+                const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                dateFrom.valueAsDate = startOfMonth;
+                dateTo.valueAsDate = today;
+              }
+              
+              function setThisYear() {
+                const startOfYear = new Date(today.getFullYear(), 0, 1);
+                dateFrom.valueAsDate = startOfYear;
+                dateTo.valueAsDate = today;
+              }
+              
+              presetButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                  const preset = this.getAttribute('data-preset');
+                  presetButtons.forEach(b => b.classList.remove('active'));
+                  this.classList.add('active');
+                  switch(preset) {
+                    case 'today':
+                      setToday();
+                      break;
+                    case 'week':
+                      setThisWeek();
+                      break;
+                    case 'month':
+                      setThisMonth();
+                      break;
+                    case 'year':
+                      setThisYear();
+                      break;
+                  }
+                });
+              });
+              
+              function applyFilter() {
+                if (!dateFrom.value || !dateTo.value) {
+                  sessionCards.forEach(card => {
+                    card.style.display = 'flex';
+                  });
+                  activeFilterIndicator.style.display = 'none';
+                  return;
+                }
+                
+                const fromDate = new Date(dateFrom.value);
+                const toDate = new Date(dateTo.value);
+                toDate.setHours(23, 59, 59, 999);
+                
+                const selectedTrainer = trainerFilter.value;
+                let visibleCount = 0;
+                
+                sessionCards.forEach(card => {
+                  const dateText = card.querySelector('.session-date span').textContent;
+                  const sessionDate = new Date(dateText);
+                  const cardTrainer = card.getAttribute('data-trainer-id');
+                  const matchesTrainer = selectedTrainer === 'all' || cardTrainer === selectedTrainer;
+                  
+                  if (sessionDate >= fromDate && sessionDate <= toDate && matchesTrainer) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                  } else {
+                    card.style.display = 'none';
+                  }
+                });
+                
+                const fromFormatted = fromDate.toLocaleDateString();
+                const toFormatted = toDate.toLocaleDateString();
+                activeFilterIndicator.textContent = `Showing ${visibleCount} sessions from ${fromFormatted} to ${toFormatted}`;
+                activeFilterIndicator.style.display = 'block';
+              }
+              
+              applyDateFilter.addEventListener('click', applyFilter);
+              
+              clearDateFilter.addEventListener('click', function() {
+                dateFrom.value = '';
+                dateTo.value = '';
+                presetButtons.forEach(btn => btn.classList.remove('active'));
+                sessionCards.forEach(card => {
+                  card.style.display = 'flex';
+                });
+                activeFilterIndicator.style.display = 'none';
+              });
+              
+              trainerFilter.addEventListener('change', function() {
+                if (dateFrom.value && dateTo.value) {
+                  applyFilter();
+                } else {
+                  const selectedTrainer = this.value;
+                  sessionCards.forEach(card => {
+                    const cardTrainer = card.getAttribute('data-trainer-id');
+                    if (selectedTrainer === 'all' || cardTrainer === selectedTrainer) {
+                      card.style.display = 'flex';
+                    } else {
+                      card.style.display = 'none';
+                    }
+                  });
+                }
+              });
+              applyFilter();
+            });
+          </script>
+      </div>
+    </div>
+    <%- include("partials/footer.ejs") %>
+  </main>
+</body>
+</html>

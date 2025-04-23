@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= "Status" %></title>
+    <link rel="stylesheet" href="/css/status.css"> 
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <main>
+        <%- include("partials/header.ejs") %>
+        <h2><%= status %></h2>
+        <h2><%= message %></h2>
+            <div class="error-container">
+                <img src="/img/404_status_img.png" alt="404 Page Not Found Logo" class="error-logo">
+                <a href="/session_timetable" class="error-button">Session Timetable</a>
+                <a href="/authenticate" class="error-button">Login</a>
+            </div>
+        <%- include("partials/footer.ejs") %>
+    </main>
+</body>
+</html>

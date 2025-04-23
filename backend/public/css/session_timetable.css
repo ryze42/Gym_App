@@ -1,0 +1,181 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background-color: #232323;
+  display: flex; 
+  flex-direction: column;
+  height: 100vh;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  padding-top: 40px; 
+}
+
+.container {
+  max-width: 900px;
+  width: 100%;
+  position: relative
+}
+
+.title {
+  text-align: center;
+  color: white;
+  font-size: 24px;
+  margin-bottom: 20px;
+  margin-top: 50px
+}
+
+.filter-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+  background-color: #1c1c1c;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.filter-container label {
+  color: white;
+  font-size: 14px;
+}
+
+.filter-container select {
+  background-color: white;
+  color: black;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+}
+
+.filter-button {
+  background-color: white;
+  color: black;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.timetable {
+  background-color: #1c1c1c;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 60px;
+}
+
+.day {
+  background-color: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.day h2 {
+  font-size: 18px;
+  color: black;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.session-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-top: 1px solid #ccc;
+}
+
+.session-row span {
+  margin-right: 10px;
+}
+
+.session-row:first-child {
+  border-top: none;
+}
+
+.session-name {
+  flex: 2;
+  font-size: 16px;
+  color: black;
+}
+
+.session-time {
+  flex: 1;
+  font-size: 14px;
+  color: black;
+}
+
+.session-location {
+  flex: 1;
+  font-size: 14px;
+  color: black;
+}
+
+.book-session-button {
+  flex: 1;
+  text-align: center;
+  background-color: black;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.book-session-button:hover {
+  background-color: #1e90ff;
+  transition: 0.3s;
+}
+
+.no-sessions { 
+  color: #c5003c;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+@media (max-width: 855px) {
+  .filter-container { 
+    flex-direction: column;
+    justify-content: center;
+    margin: 10px auto;
+  }
+
+  .filter-container, select {
+    width: 90%;
+  }
+  
+  .session-row {
+    flex-direction: column; 
+    align-items: flex-start;
+  }
+
+  .session-row span {
+    width: 100%;     
+    margin: 4px 0;      
+  }
+
+  .book-session-button {
+    width: 100%;
+    text-align: center;
+    margin-top: 8px;
+  }
+}

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Management</title>
+    <link rel="stylesheet" href="/css/crud_bookings.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css"> 
+</head>
+<body>
+    <main>
+        <%- include("partials/header.ejs") %>
+        <div class="container">
+            <h1 class="header-title">Manage Bookings</h1>
+            <div class="filter-container">
+                <label for="memberFilter">Filter by Member:</label>
+                <select id="memberFilter">
+                    <option value="">All Members</option>
+                    <% if (members && members.length) { %>
+                        <% members.forEach(member => { %>
+                            <option value="<%= member.id %>" <%= selectedBooking && selectedBooking.booking && selectedBooking.booking.member_id == member.id ? 'selected' : '' %>>
+                                <%= member.first_name + " " + member.last_name %>
+                            </option>
+                        <% }); %>
+                    <% } %>
+                </select> 
+            </div>
+            <div class="content">
+                <div class="form-container">
+                    <form action="/booking/<%= selectedBooking.booking ? selectedBooking.booking.id : '' %>" method="POST">
+                        <% if (selectedBooking && selectedBooking.booking && selectedBooking.booking.id) { %>
+                            <input type="hidden" name="id" value="<%= selectedBooking.booking.id %>">
+                            <input type="hidden" name="action" value="update">
+                        <% } else { %>
+                            <input type="hidden" name="action" value="create">
+                        <% } %>
+                        
+                        <label for="member_id">Member</label>
+                        <select id="member_id" name="member_id">
+                            <option value="" disabled selected>Select Member</option>
+                            <% if (members && members.length) { %>
+                                <% members.forEach(member => { %>
+                                    <option value="<%= member.id %>" <%= selectedBooking && selectedBooking.booking 
+                                        && selectedBooking.booking.member_id == member.id ? 'selected' : '' %>>
+                                        <%= member.first_name + " " + member.last_name %>
+                                    </option>
+                                <% }); %>
+                            <% } else { %>
+                                <option>No members available</option>
+                            <% } %>
+                        </select>
+
+                        <label for="session-id">Session</label>
+                        <select id="session-id" name="session_id">
+                            <option value="" disabled selected>Select a Session</option>
+                            <% if (sessions && sessions.length) { %>
+                                <% sessions.forEach(item => { %>
+                                    <%
+                                        let session = item.session;
+                                        let formattedDate = "Unknown Date";
+                                        let formattedTime = "Unknown Time";
+
+                                        if (session && session.date) {
+                                            let date = new Date(session.date);
+                                            if (!isNaN(date.getTime())) {
+                                                formattedDate = date.toLocaleDateString();
+                                            }
+                                        }
+                                        if (session && session.start_time) {
+                                            formattedTime = session.start_time;
+                                        }
+                                        let activityName = item.activity && item.activity.name ? item.activity.name : "Unknown Activity";
+                                        let trainerName = item.trainer && item.trainer.first_name && item.trainer.last_name 
+                                                          ? item.trainer.first_name + " " + item.trainer.last_name : "Unknown Trainer";
+                                        let locationName = item.location && item.location.name ? item.location.name : "Unknown Location";
+                                    %>
+                                    <option value="<%= session.id %>" <%= selectedBooking && selectedBooking.booking 
+                                        && selectedBooking.booking.session_id == session.id ? 'selected' : '' %>>
+                                        <%= activityName %> - <%= trainerName %> - <%= locationName %> 
+                                        (<%= formattedDate %> <%= formattedTime %>)
+                                    </option>
+                                <% }); %>
+                            <% } else { %>
+                                <option>No sessions available</option>
+                            <% } %>
+                        </select>
+
+                        <label for="status">Status</label>
+                        <select id="status" name="status">
+                            <option value="active" <%= selectedBooking && selectedBooking.booking && selectedBooking.booking.status === "active" ? "selected" : "" %>>Active</option>
+                            <option value="cancelled" <%= selectedBooking && selectedBooking.booking && selectedBooking.booking.status === "cancelled" ? "selected" : "" %>>Cancelled</option>
+                        </select>
+
+                        <div class="button-container">
+                            <button type="button" class="clear-btn" onclick="window.location.href='/booking'">Clear</button>
+                            <button type="submit" class="submit-btn">Create New Booking / Edit</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="booking-list">
+                    <% if (bookings && bookings.length > 0) { %>
+                        <% bookings.sort((a, b) => a.booking.id - b.booking.id); %>
+                        <% bookings.forEach(booking => { %>
+                            <div class="booking-card" data-member-id="<%= booking.booking.member_id %>">
+                                <div class="booking-text">
+                                    <p class="booking-id">Booking ID: <%= booking.booking.id %></p>
+                                    <p class="booking-activity">Activity: <span><%= booking.activity.name %></span></p>
+                                    <p class="booking-member">Member Name: 
+                                        <span>
+                                            <% let memberDetails = members.find(member => member.id == booking.booking.member_id);
+                                                if (memberDetails) {
+                                                    %><%= memberDetails.first_name + " " + memberDetails.last_name %><%
+                                                } else {
+                                                    %>Unknown Member<%
+                                                }
+                                            %>
+                                        </span>
+                                    </p>
+                                    <p class="booking-date">Date: <span><%= new Date(booking.session.date).toDateString() %></span></p>
+                                    <p class="booking-start-time">Start Time: <span><%= booking.session.start_time %></span></p>
+                                    <p class="booking-location">Location: <span> <%= booking.location.name %></span></p>
+                                    <p class="booking-trainer">Trainer: <span><%= booking.trainer.first_name + ' ' + booking.trainer.last_name %></span></p>
+                                    <p class="booking-session-details">
+                                        Session: 
+                                        <span>
+                                            <%= booking.activity.name %> - 👤 <%= booking.trainer.first_name + ' ' + booking.trainer.last_name %> - 📍 <%= booking.location.name %>
+                                            (<%= new Date(booking.session.date).toLocaleDateString() %> <%= booking.session.start_time %>)
+                                        </span>
+                                    </p>
+                                    <p class="booking-status">Status: <span><%= booking.booking.status %></span></p>
+                                </div>
+                                <div class="booking-actions">
+                                    <a href="/booking/<%= booking.booking.id %>" class="edit-btn">Edit</a>
+                                    <form action="/booking/<%= booking.booking.id %>" method="POST" style="display:inline;" 
+                                        onsubmit="return confirm('Are you sure you want to delete this booking?');">
+                                        <input type="hidden" name="action" value="delete">
+                                        <button type="submit" class="delete-btn">❌</button>
+                                    </form>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="no-bookings">No bookings available.</p>
+                    <% } %>
+                </div> 
+            </div> 
+            <script>
+                document.getElementById('memberFilter').addEventListener('change', function() {
+                    const selectedMemberId = this.value;
+                    const bookingCards = document.querySelectorAll('.booking-card');
+                    
+                    bookingCards.forEach(card => {
+                        if (!selectedMemberId || card.dataset.memberId === selectedMemberId) {
+                            card.classList.remove('hidden-card');
+                        } else {
+                            card.classList.add('hidden-card');
+                        }
+                    });
+                });
+            </script>
+        </div> 
+        <%- include("partials/footer.ejs") %>
+    </main>
+</body>
+</html>

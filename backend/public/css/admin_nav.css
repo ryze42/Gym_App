@@ -1,0 +1,41 @@
+.admin-nav {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+  
+  .admin-nav a {
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+  }
+  
+  @media (max-width: 768px) {
+    .burger-menu {
+      display: block;
+    }
+    
+    .admin-nav {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      top: 100%;
+      right: 20px;
+      background-color: #232323;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    
+    .admin-nav.open {
+      display: flex;
+    }
+    
+    .admin-nav a {
+      padding: 10px;
+      border-bottom: 1px solid #444;
+    }
+    
+    .admin-nav a:last-child {
+      border-bottom: none;
+    }
+  }

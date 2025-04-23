@@ -1,0 +1,52 @@
+<header class="header">
+    <div class="left-nav">
+      <% if (typeof authenticatedUser !== 'undefined' && authenticatedUser) { %>
+        <a href="/authenticate/logout" class="logout-link">Logout</a>
+      <% } %>
+    </div>
+  
+    <div class="logo-container">
+      <a href="/session_timetable">
+        <img src="/img/hsg_logo_322x105.png" alt="High Street Gym Logo" class="logo">
+      </a>
+    </div>
+  
+    <div class="right-nav">
+      <% 
+        const userRole = (typeof authenticatedUser !== 'undefined' && authenticatedUser) ? authenticatedUser.role : null;
+      %>
+      <% if (userRole === "admin") { %>
+        <div class="burger-menu admin" onclick="toggleMenu()">&#9776;</div>
+        <nav id="admin-nav" class="admin-nav">
+          <a href="/session_timetable">Session Timetable</a>
+          <a href="/blog">Blog Posts</a>
+          <a href="/user">Manage Users</a>
+          <a href="/session">Manage Sessions</a>
+          <a href="/activity">Manage Activities</a>
+          <a href="/location">Manage Locations</a>
+          <a href="/blog/blog_posts">Manage Blog Posts</a>
+          <a href="/booking">Manage Bookings</a>
+        </nav>
+      <% } else if (userRole === "trainer" || userRole === "member") { %>
+        <nav class="plain-nav desktop-only">
+          <%- include("./admin_nav.ejs", { role: userRole }) %>
+        </nav>
+        <div class="burger-menu mobile-only" onclick="toggleMenu('mobile')">&#9776;</div>
+        <nav id="mobile-nav" class="admin-nav">
+          <%- include("./admin_nav.ejs", { role: userRole }) %>
+        </nav>
+      <% } %>
+    </div>
+
+    <script>
+      function toggleMenu(type) {
+        const nav = (type === 'mobile') 
+                      ? document.getElementById('mobile-nav') 
+                      : document.getElementById('admin-nav');
+        if (nav) {
+          nav.classList.toggle('open');
+        }
+      }
+    </script>
+</header>
+  

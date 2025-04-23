@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Register - High Street Gym</title>
+    <link rel="stylesheet" href="./css/login.css">
+    <link rel="stylesheet" href="./css/header.css">
+    <link rel="stylesheet" href="./css/footer.css">
+    <style>
+        .hidden { display: none; } 
+    </style>
+</head>
+<body>
+    <%- include("./partials/header.ejs") %>
+    <div class="container">
+        <div class="card" id="loginCard">
+            <h2>Login</h2>
+            <form action="/authenticate" method="POST" onsubmit="return validateForm(this)">
+                <label for="email">Email</label>
+                <input type="text" id="loginEmail" name="email" placeholder="Enter email..."required>
+
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter password..." required>
+
+                <button type="submit">Login</button>
+            </form>
+            <p class="toggle-link">Don't have an account? <a href="#" onclick="toggleForms(event, 'register')">Register</a></p>
+        </div>
+
+        <!-- Password is "test" for accounts: (member@gmail.com, trainer@gmail.com, admin@gmail.com)-->
+
+        <div class="card hidden" id="registerCard">
+            <h2>Register</h2>
+            <form action="/authenticate/register" method="POST" onsubmit="return validateForm(this)">
+                <label for="first_name">First Name</label>
+                <input type="text" id="first_name" name="first_name" placeholder="Enter first name..." required>
+
+                <label for="last_name">Last Name</label>
+                <input type="text" id="last_name" name="last_name" placeholder="Enter last name..." required>
+
+                <input type="hidden" name="role" value="member">
+
+                <label for="email">Email</label>
+                <input type="text" id="registerEmail" name="email" placeholder="Enter email..." required>
+
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter password..."required>
+
+
+                <button type="submit">Register</button>
+            </form>
+            <p class="toggle-link">Already have an account? <a href="#" onclick="toggleForms(event, 'login')">Login</a></p>
+        </div>
+    </div>
+    <%- include("partials/footer.ejs") %>
+    <script>
+        function toggleForms(event, formType) {
+            event.preventDefault(); 
+            
+            const loginCard = document.getElementById('loginCard');
+            const registerCard = document.getElementById('registerCard');
+
+            if (formType === 'register') {
+                loginCard.classList.add('hidden');
+                registerCard.classList.remove('hidden');
+            } else {
+                registerCard.classList.add('hidden');
+                loginCard.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
