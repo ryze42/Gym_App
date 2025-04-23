@@ -1,0 +1,259 @@
+components:
+  schemas:
+    Session: 
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID of the session.
+          example: 1
+        activity_id:
+          type: integer
+          description: The ID of the activity associated with the session.
+          example: 7
+        date:
+          type: string
+          format: date
+          description: The date of the session.
+          example: "2025-05-01"
+        start_time:
+          type: string
+          format: time
+          description: The start time of the session.
+          example: "10:00:00"
+        location_id:
+          type: integer
+          description: The ID of the location for the session.
+          example: 3
+        trainer_id:
+          type: integer
+          description: The ID of the trainer for the session.
+          example: 2
+      required:
+        - activity_id
+        - date
+        - start_time
+        - location_id
+        - trainer_id
+        
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID of the user.
+          example: 1
+        first_name:
+          type: string
+          description: First name of the user.
+          example: "John"
+        last_name:
+          type: string
+          description: Last name of the user.
+          example: "Doe"
+        role:
+          type: ENUM("admin", "trainer", "member")
+          description: Role of the user.
+          example: "admin"
+        email:
+          type: string
+          description: Email address of the user.
+          example: "johnsmith@gmail.com"
+        password:
+          type: string
+          description: Password of the user (hashed with bcryptjs).
+          example: "$2a$10$EIX5Q1Z5Y5Z5Y5Z5Y5Z5Z.0"
+      required:
+        - first_name
+        - last_name
+        - role
+        - email
+        - password
+
+    Booking:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID of the booking.
+          example: 10
+        member_id:
+          type: integer
+          description: The ID of the member making the booking.
+          example: 1
+        session_id:
+          type: integer
+          description: The ID of the session being booked.
+          example: 5
+        status:
+          type: ENUM("active", "cancelled")
+          description: Current status of the booking.
+          example: "active"
+      required:
+        - member_id
+        - session_id
+        - status
+
+    Activity:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID of the activity.
+          example: 5
+        name:
+          type: string
+          description: Name of the activity.
+          example: "Yoga"
+        duration:
+          type: integer
+          description: Duration of the activity in minutes.
+          example: 60
+      required:
+        - name
+        - duration
+
+    Location:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID of the location.
+          example: 3
+        name:
+          type: string
+          description: Name of the location.
+          example: "Ashgrove"
+        address:
+          type: string
+          description: Address of the location.
+          example: "123 Ashgrove Road, Ashgrove"
+      required:
+        - name
+        - address
+
+    BlogPost:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID of the blog post.
+          example: 99
+        user_id:
+          type: integer
+          description: The ID of the user who created the blog post.
+          example: 1
+        subject:
+          type: string
+          description: Subject of the blog post.
+          example: "subject goes here"
+        content:
+          type: string
+          description: Content of the blog post.
+          example: "content goes here"
+      required:
+        - user_id
+        - subject
+        - content
+
+  responses:
+    Created:
+      description: "A new item was created"
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - message
+            properties:
+              id:
+                type: number
+                example: 1
+              message:
+                type: string
+                example: "Item created"
+
+    NotFound:
+      description: "Item not found"
+      content:
+        application/json:
+          schema:
+            type: object
+            required: 
+              - message
+            properties:
+              message:
+                type: string
+                example: "Item not found"
+
+    Error:
+      description: "An error occurred"
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                type: string
+                example: "Something went wrong"
+              errors:
+                type: array
+                items:
+                  type: string
+                  example: "Invalid email address"
+
+  requestBodies:
+    BlogPost:
+      description: Blog post object to create or update.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BlogPost'
+    User:
+      description: User object to register or update.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    Session:
+      description: Session object to create a login session.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Session'
+    Booking:
+      description: Booking object to create or update.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Booking'
+    Activity:
+      description: Activity object to create or update.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Activity'
+    Location:
+      description: Location object to create or update.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Location'
+
+  parameters:
+    BlogPostId:
+      name: id
+      in: path
+      required: true
+      description: ID of the blog post.
+      schema:
+        type: integer

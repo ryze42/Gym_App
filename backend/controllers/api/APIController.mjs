@@ -3,7 +3,7 @@ import swaggerJSDoc from "swagger-jsdoc"
 import swaggerUI from "swagger-ui-express"
 import * as ApiValidator from "express-openapi-validator"
 //import { APIProductsController } from "./APIProductsController.mjs"
-import { APIUserController } from "./APIUserontroller.mjs"
+
 
 const options = {
     failOnErrors: true, // Whether or not to throw when parsing errors. Defaults to false.
@@ -12,7 +12,7 @@ const options = {
         info: {
             version: "1.0.0",
             title: "HSG API",
-            description: "JSON REST API for interacting with the minute coffee backend",
+            description: "JSON REST API for hsg backend",
         },
         components: {
             securitySchemes: {
@@ -64,7 +64,7 @@ export class APIController {
         
         // Api controllers
         //this.routes.use("/products", APIProductsController.routes)
-        this.routes.use("/users", APIUserController.routes)
+        // this.routes.use("/users", APIUserController.routes)
     }
     
 
