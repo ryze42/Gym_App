@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs"
 export class APIAuthenticationController {
     static middleware = express.Router()
     static routes = express.Router()
-
+    
     static {
         this.middleware.use(this.#APIAuthenticationProvider)
         this.routes.post("/authenticate", this.handleAuthenticate)
@@ -13,8 +13,8 @@ export class APIAuthenticationController {
     }
 
     /**
-     * This middleware checks for the API key header in the incoming request
-     * and loads the respective user into req.authenticatedUser if found.
+     * This middleware checks the for the API key header and
+     * loads the respective user into req.authenticatedUser if found.
      * 
      * @private
      * @type {express.RequestHandler}
@@ -23,32 +23,30 @@ export class APIAuthenticationController {
         const authenticationKey = req.headers["x-auth-key"]
         if (authenticationKey) {
             try {
-                req.authenticatedUser 
-                    = await EmployeeModel.getByAuthenticationKey(authenticationKey)
+                req.authenticatedUser = await UserModel.getByAuthenticationKey(authenticationKey)
             } catch (error) {
                 if (error == "not found") {
                     res.status(404).json({
                         message: "Failed to authenticate - key not found"
                     })
                 } else {
-                    console.error(error)
                     res.status(500).json({
-                        message: "Failed to authenticate - database error"
+                        message: "Failed to authenticated - database error"
                     })
                 }
+                // Early return here so that next() doesn't run when there was an error
+                return
             }
         }
         next()
     }
-    
 
     /**
-     * 
      * @type {express.RequestHandler}
      * @openapi
-     *  /api/authenticate:
+     * /api/authenticate:
      *      post:
-     *          summary: "Authenticate with username and password"
+     *          summary: "Authenticate with email and password"
      *          tags: [Authentication]
      *          requestBody:
      *              required: true
@@ -64,28 +62,32 @@ export class APIAuthenticationController {
      *              '500':
      *                  $ref: "#/components/responses/Error"
      *      delete:
-     *          summary: "Deauthenticate with API key header"
+     *          summary: "Deauthenticate"
      *          tags: [Authentication]
      *          security:
-     *              - ApiKey: []
+     *              - ApiKey: [] 
      *          responses:
      *              '200':
      *                  $ref: "#/components/responses/Updated"
+     *              '400':
+     *                  $ref: "#/components/responses/Error"
+     *              '500':
+     *                  $ref: "#/components/responses/Error"
      *              default:
      *                  $ref: "#/components/responses/Error"
-     * 
      */
     static async handleAuthenticate(req, res) {
         if (req.method == "POST") {
             try {
-                const employee = await EmployeeModel.getByEmail(req.body.email)
-    
+                const user = await UserModel.getByEmail(req.body.email)
+
                 if (await bcrypt.compare(req.body.password, user.password)) {
                     const authenticationKey = crypto.randomUUID()
-                    
+
+                    // Store the authenticated user's authentication key into the database
                     user.authenticationKey = authenticationKey
                     await UserModel.update(user)
-                    
+
                     res.status(200).json({
                         key: authenticationKey
                     })
@@ -98,37 +100,36 @@ export class APIAuthenticationController {
                 switch (error) {
                     case "not found":
                         res.status(400).json({
-                            message: "Invalid credentials"
+                            message: "Invalid credentials",
                         })
                         break;
                     default:
                         console.error(error)
                         res.status(500).json({
-                            message: "Failed to authenticate user"
+                            message: "Failed to authenticate user",
                         })
                         break;
                 }
             }
         } else if (req.method == "DELETE") {
             if (req.authenticatedUser) {
-                const user = await UserModel
-                    .getByAuthenticationKey(req.authenticatedUser.authenticationKey)
+                // Clear authentication key and send JSON response
+                const user = await UserModel.getByAuthenticationKey(req.authenticatedUser.authenticationKey)
                 user.authenticationKey = null
                 await UserModel.update(user)
-                
                 res.status(200).json({
                     message: "Deauthentication successful"
-                })                
+                })
             } else {
-                res.status(401).json({
-                    message: "Please login to access the requested resources"
+                res.status(401).render("status.ejs", {
+                    message: "Please login to access the requested resource."
                 })
             }
         }
+
     }
-    
+
     /**
-     * Allows us to define restricted routes
      * 
      * @param {Array<"admin" | "trainer" | "member"> | "any"} allowedRoles 
      * @returns {express.RequestHandler}
@@ -141,40 +142,15 @@ export class APIAuthenticationController {
                 } else {
                     res.status(403).json({
                         message: "Access forbidden",
-                        errors: ["Role does not have access to the requested resource"]
+                        errors: ["Role does not have access to the requested resource."]
                     })
                 }
             } else {
                 res.status(401).json({
                     message: "Not authenticated",
-                    errors: ["Please authenticate to access the requested resource"]
+                    errors: ["Please authenticate to access the requested resource."]
                 })
             }
         }
     }
 }
-
-
-
-
-// try {
-            //     const user = req.authenticatedUser
-            //     if (!user) {
-            //         res.status(400).json({
-            //             message: "No user authenticated"
-            //         })
-            //         return
-            //     }
-    
-            //     user.authenticationKey = null
-            //     await UserModel.update(user)
-    
-            //     res.status(200).json({
-            //         message: "User deauthenticated"
-            //     })
-            // } catch (error) {
-            //     console.error(error)
-            //     res.status(500).json({
-            //         message: "Failed to deauthenticate user"
-            //     })
-            // }
