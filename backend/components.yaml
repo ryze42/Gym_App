@@ -1,7 +1,22 @@
 components:
   schemas:
+    AuthenticationKey:
+      type: object
+      required: 
+        - key 
+      properties:
+        key:
+          type: string
+          format: uuid
+
     Session: 
       type: object
+      required:
+        - activity_id
+        - date
+        - start_time
+        - location_id
+        - trainer_id
       properties:
         id:
           type: integer
@@ -29,46 +44,42 @@ components:
           type: integer
           description: The ID of the trainer for the session.
           example: 2
-      required:
-        - activity_id
-        - date
-        - start_time
-        - location_id
-        - trainer_id
         
-    User:
+    User: 
       type: object
-      properties:
-        id:
-          type: integer
-          description: ID of the user.
-          example: 1
-        first_name:
-          type: string
-          description: First name of the user.
-          example: "John"
-        last_name:
-          type: string
-          description: Last name of the user.
-          example: "Doe"
-        role:
-          type: ENUM("admin", "trainer", "member")
-          description: Role of the user.
-          example: "admin"
-        email:
-          type: string
-          description: Email address of the user.
-          example: "johnsmith@gmail.com"
-        password:
-          type: string
-          description: Password of the user (hashed with bcryptjs).
-          example: "$2a$10$EIX5Q1Z5Y5Z5Y5Z5Y5Z5Z.0"
       required:
+        - id
         - first_name
         - last_name
         - role
         - email
         - password
+        - authenticationKey
+      properties:
+        id:
+          type: number
+          example: 1
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        role:
+          type: string
+          example: "admin"
+          enum: [admin, member, trainer]
+        email:
+          type: string
+          format: email
+          example: "123@gmail.com"    
+        password: 
+          type: string
+          example: "********"
+        authenticationKey:  
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
 
     Booking:
       type: object
@@ -157,6 +168,22 @@ components:
         - content
 
   responses:
+    LoginSuccessful:
+      description: "Login successful"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthenticationKey'
+    Updated:
+      description: "A item was updated"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Item updated"
     Created:
       description: "A new item was created"
       content:

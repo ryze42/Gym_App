@@ -78,7 +78,21 @@ export class UserModel extends DatabaseModel {
      * @throws {Promise<Error>} if no user is found, rejects with message "not found".
      */
     static getByEmail(email) {
-        return this.query("SELECT * FROM users WHERE email = ?", [email])
+        return this.query("SELECT * FROM users WHERE email = ? AND deleted = 0", [email])
+            .then(result =>
+                result.length > 0
+                    ? this.tableToModel(result[0].users)
+                    : Promise.reject("not found")
+            )
+    }
+
+    /**
+     * 
+     * @param {string} authenticationKey 
+     * @returns {Promise<EmployeeModel>}
+     */
+    static getByAuthenticationKey(authenticationKey) {
+        return this.query("SELECT * FROM users WHERE authentication_key = ? AND deleted = 0", [authenticationKey])
             .then(result =>
                 result.length > 0
                     ? this.tableToModel(result[0].users)

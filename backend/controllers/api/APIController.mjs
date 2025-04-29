@@ -2,6 +2,7 @@ import express from "express"
 import swaggerJSDoc from "swagger-jsdoc"
 import swaggerUI from "swagger-ui-express"
 import * as ApiValidator from "express-openapi-validator"
+import { APIAuthenticationController } from "../api/APIAuthenticationController.mjs"
 //import { APIProductsController } from "./APIProductsController.mjs"
 
 
@@ -62,6 +63,10 @@ export class APIController {
             })
         })
         
+        // API authentication middleware and routes
+        this.routes.use(APIAuthenticationController.middleware)
+        this.routes.use(APIAuthenticationController.routes)
+
         // Api controllers
         //this.routes.use("/products", APIProductsController.routes)
         // this.routes.use("/users", APIUserController.routes)
