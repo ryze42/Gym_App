@@ -3,7 +3,10 @@ import swaggerJSDoc from "swagger-jsdoc"
 import swaggerUI from "swagger-ui-express"
 import * as ApiValidator from "express-openapi-validator"
 import { APIAuthenticationController } from "../api/APIAuthenticationController.mjs"
-//import { APIProductsController } from "./APIProductsController.mjs"
+import { APIUserController } from "./APIUserController.mjs"
+import { APIBlogPostController } from "../api/APIBlogPostController.mjs"
+import { APIBookingController } from "../api/APIBookingController.mjs"
+import { APISessionController } from "../api/APISessionController.mjs"
 
 
 const options = {
@@ -66,11 +69,14 @@ export class APIController {
         // API authentication middleware and routes
         this.routes.use(APIAuthenticationController.middleware)
         this.routes.use(APIAuthenticationController.routes)
+        this.routes.use("/users", APIUserController.routes)
+        this.routes.use("/blog_posts", APIBlogPostController.routes)
+        this.routes.use("/booking", APIBookingController.routes)
+        this.routes.use("/session", APISessionController.routes)
+
 
         // Api controllers
         //this.routes.use("/products", APIProductsController.routes)
         // this.routes.use("/users", APIUserController.routes)
     }
-    
-
 }

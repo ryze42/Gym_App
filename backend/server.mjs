@@ -8,10 +8,19 @@ import { ActivityController } from "./controllers/ActivityController.mjs"
 import { UserController } from "./controllers/UserController.mjs"
 import { SessionController } from "./controllers/SessionController.mjs"
 import { BookingController } from "./controllers/BookingController.mjs"
-import { APIController } from "./controllers/api/APIController.mjs"
+import { APIController } from "./controllers/API/APIController.mjs"
+import cors from "cors"
 
 const app = express()
 const port = 8080
+
+// Enable cross-origin resources sharing (CORS) and preflight OPTIONS requests
+app.use(
+    cors({
+        origin: true, // Allow all origins
+        // origin: "http://localhost:8080", // Allow only backend origin 
+    })
+)
 
 app.set("view engine", "ejs")
 app.set("views", path.join(import.meta.dirname, "views"))

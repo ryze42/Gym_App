@@ -11,5 +11,8 @@
   "workspaces": [
     "backend",
     "frontend"
-  ]
+  ],
+  "dependencies": {
+    "cors": "^2.8.5"
+  }
 }
