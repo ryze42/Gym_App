@@ -10,8 +10,9 @@ export class UserModel extends DatabaseModel {
      * @param {string} role - The role of the user ("admin", "member", "trainer").
      * @param {string} email - The email address of the user.
      * @param {string} password - The password of the user (hashed with bcryptjs).
+     * @param {string} authentication_key - The authentication api key
      */
-    constructor(id, first_name, last_name, role, email, password) {
+    constructor(id, first_name, last_name, role, email, password, authentication_key = null) {
         super()
         this.id = id
         this.first_name = first_name
@@ -19,6 +20,7 @@ export class UserModel extends DatabaseModel {
         this.role = role
         this.email = email
         this.password = password
+        this.authentication_key
     }
 
     /**
@@ -30,6 +32,7 @@ export class UserModel extends DatabaseModel {
      * @param {string} row.role - role of user ("admin", "trainer", "member")
      * @param {string} row.email - email address of the user
      * @param {string} row.password - password of the user (hashed with bcryptjs)
+     * @param {string} authentication_key - the authentication api key
      * @returns {UserModel} new instance of the UserModel class.
      */
     static tableToModel(row) {
@@ -39,7 +42,8 @@ export class UserModel extends DatabaseModel {
             row["last_name"],
             row["role"],
             row["email"],
-            row["password"]    
+            row["password"],  
+            row["authentication_key"]  
         )
     }
 
@@ -98,12 +102,13 @@ export class UserModel extends DatabaseModel {
                 password = CASE 
                     WHEN ? IS NOT NULL THEN ? 
                     ELSE password 
+                authentication_key = ?
                 END
             WHERE id = ?
         `,
-        [user.first_name, user.last_name, user.role, user.email, user.password, user.password, user.id]);
+        [user.first_name, user.last_name, user.role, user.email, user.password, user.password, user.authentication_key, user.id]);
     }
-
+                                                                                            // user.authenticationKey???
     /**
      * Creates a new user in the database
      * @param {UserModel} users
@@ -112,10 +117,10 @@ export class UserModel extends DatabaseModel {
     static create(users) {
         return this.query(`
             INSERT INTO users
-            (first_name, last_name, role, email, password)
-            VALUES (?, ?, ?, ?, ?)
+            (first_name, last_name, role, email, password, authentication_key)
+            VALUES (?, ?, ?, ?, ?, ?)
         `,
-            [users.first_name, users.last_name, users.role, users.email, users.password]
+            [users.first_name, users.last_name, users.role, users.email, users.password, users.authentication_key]
         )
     }
 
