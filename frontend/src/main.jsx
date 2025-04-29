@@ -4,6 +4,6 @@ import './index.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <h1>hi</h1>
+    <h1 data-theme="dark" className="btn btn-success btn-lg">Hello vite!</h1>
   </StrictMode>,
 )
