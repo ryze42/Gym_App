@@ -17,7 +17,7 @@ const port = 8080
 // Enable cross-origin resources sharing (CORS) and preflight OPTIONS requests
 app.use(
     cors({
-        origin: true, // Allow all origins
+        origin: true, // Allow all origins, CHANGE TO BELOW  
         // origin: "http://localhost:8080", // Allow only backend origin 
     })
 )
