@@ -1,4 +1,3 @@
-import { FaLock } from "react-icons/fa"
 import { CgProfile } from "react-icons/cg";
 
 function TimetableView() {
