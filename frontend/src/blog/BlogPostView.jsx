@@ -6,3 +6,5 @@ function BlogPostView() {
 }
 
 export default BlogPostView
+
+// convert ejs view to react format component, as for others as well

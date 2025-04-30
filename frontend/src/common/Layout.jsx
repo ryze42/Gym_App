@@ -1,6 +1,9 @@
 import { CgProfile } from "react-icons/cg"
 import { IoCalendarOutline } from "react-icons/io5";
 import { FaRegCalendarAlt } from "react-icons/fa";
+import { LuCalendarDays } from "react-icons/lu";
+import { VscAccount } from "react-icons/vsc";
+import { AiOutlineSchedule } from "react-icons/ai";
 import { IoIosLogIn } from "react-icons/io";
 import { IoChatbubblesOutline } from "react-icons/io5";
 import { Outlet, useLocation, useNavigate } from "react-router"
@@ -36,7 +39,7 @@ function Layout() {
                 onClick={() => navigate("/booking")}
                 className={location.pathname.startsWith("/booking") ? "dock-active" : ""}
             >
-                <FaRegCalendarAlt className="text-2xl" />
+                <AiOutlineSchedule className="text-2xl" />
                 <span className="dock-label">My Bookings</span>
             </button>
             <button
@@ -50,7 +53,7 @@ function Layout() {
                 onClick={() => navigate("/profile")}
                 className={location.pathname.startsWith("/profile") ? "dock-active" : ""}
             >
-                <CgProfile className="text-2xl" />
+                <VscAccount className="text-2xl" />
                 <span className="dock-label">Profile</span>
             </button>
         </nav>
