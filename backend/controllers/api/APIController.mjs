@@ -6,7 +6,7 @@ import { APIAuthenticationController } from "../api/APIAuthenticationController.
 import { APIUserController } from "./APIUserController.mjs"
 import { APIBlogPostController } from "../api/APIBlogPostController.mjs"
 import { APIBookingController } from "../api/APIBookingController.mjs"
-import { APISessionTimetableController } from "./APISessionTimetableController.mjs"
+import { APISessionTimetableController } from "../api/APISessionTimetableController.mjs"
 
 
 const options = {
