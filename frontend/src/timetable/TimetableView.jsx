@@ -245,3 +245,111 @@ export default TimetableView
 // }
 
 // export default TimetableView;
+
+
+// second attempt, doesnt work 
+
+// import { useEffect, useState } from "react";
+// import { useNavigate, useSearchParams } from "react-router";
+
+// function TimetableView() {
+//   const navigate = useNavigate();
+//   const [searchParams, setSearchParams] = useSearchParams();
+//   const [sessions, setSessions] = useState(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+
+//   // Optional: read selected session ID from query
+//   const selectedSessionId = searchParams.get("sessionId");
+
+//   useEffect(() => {
+//     async function fetchSessions() {
+//       try {
+//         setLoading(true);
+//         setError(null);
+//         const res = await fetch("/api/timetable");
+//         if (!res.ok) {
+//           const body = await res.json();
+//           throw new Error(body.message || "Failed to load sessions");
+//         }
+//         const data = await res.json();
+//         setSessions(data);
+//       } catch (err) {
+//         setError(err.message);
+//       } finally {
+//         setLoading(false);
+//       }
+//     }
+
+//     fetchSessions();
+//   }, []);
+
+//   if (loading) {
+//     return (
+//       <section className="flex flex-col items-center">
+//         <span className="loading loading-spinner loading-xl"></span>
+//       </section>
+//     );
+//   }
+
+//   if (error) {
+//     return (
+//       <section className="flex flex-col items-center">
+//         <span className="p-4 text-red-600">{error}</span>
+//       </section>
+//     );
+//   }
+
+//   const days = Object.keys(sessions || {});
+//   if (!days.length) {
+//     return (
+//       <section className="flex flex-col items-center">
+//         <h1 className="text-2xl font-semibold p-4">Timetable</h1>
+//         <span className="p-4 text-gray-500">There are no sessions for the next week.</span>
+//       </section>
+//     );
+//   }
+
+//   return (
+//     <section className="flex flex-col items-center w-full max-w-3xl">
+//       <h1 className="text-2xl font-semibold p-4">Session Timetable</h1>
+//       {days.map((day) => (
+//         <div key={day} className="w-full mb-6">
+//           <h2 className="text-xl font-medium mb-2">{day}</h2>
+//           {Object.entries(sessions[day]).map(([activityName, slots]) => (
+//             <div key={activityName} className="mb-4">
+//               <h3 className="text-lg font-semibold mb-1">{activityName}</h3>
+//               <ul className="bg-white shadow rounded p-2">
+//                 {slots.map((slot) => (
+//                   <li
+//                     key={slot.session.id}
+//                     className={`flex items-center justify-between p-2 border-b last:border-b-0 ${
+//                       selectedSessionId == slot.session.id ? 'bg-yellow-100' : ''
+//                     }`}
+//                   >
+//                     <div>
+//                       <div className="font-medium">{slot.session.start_time}</div>
+//                       <div className="text-sm text-gray-600">{slot.location.name}</div>
+//                       <div className="text-sm text-gray-600">Trainers: {slot.trainers.length}</div>
+//                     </div>
+//                     <button
+//                       className="btn btn-sm"
+//                       onClick={() => {
+//                         // update query string without full navigation
+//                         setSearchParams({ sessionId: slot.session.id });
+//                       }}
+//                     >
+//                       View
+//                     </button>
+//                   </li>
+//                 ))}
+//               </ul>
+//             </div>
+//           ))}
+//         </div>
+//       ))}
+//     </section>
+//   );
+// }
+
+// export default TimetableView;

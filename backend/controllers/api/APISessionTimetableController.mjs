@@ -69,6 +69,55 @@ export class APISessionTimetableController {
      * Gets the activities from SessionTrainerActivityLocationModel.getAll for the activity filter.
      * @param {express.Request} req 
      * @param {express.Response} res 
+     * @openapi
+     * /api/timetable:
+     *   get:
+     *     summary: Retrieve sessions grouped by day and activity
+     *     security:
+     *       - ApiKey: []  
+     *     parameters:
+     *       - in: query
+     *         name: location
+     *         schema:
+     *           type: string
+     *         description: Filter sessions by location name (exact match) or “all” for no filter.
+     *       - in: query
+     *         name: sessionId
+     *         schema:
+     *           type: integer
+     *         description: Highlight a specific session by its ID.
+     *     responses:
+     *       '200':
+     *         description: A map of dates → activities → session slots
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               additionalProperties:
+     *                 type: object
+     *                 additionalProperties:
+     *                   type: array
+     *                   items:
+     *                     type: object
+     *                     properties:
+     *                       session:
+     *                         $ref: '#/components/schemas/Session'
+     *                       activity:
+     *                         $ref: '#/components/schemas/Activity'
+     *                       location:
+     *                         $ref: '#/components/schemas/Location'
+     *                       trainers:
+     *                         type: array
+     *                         items:
+     *                           $ref: '#/components/schemas/User'
+     *                       sessionIds:
+     *                         type: array
+     *                         items:
+     *                           type: integer
+     *       '401':
+     *         $ref: '#/components/responses/NotFound'
+     *       '500':
+     *         $ref: '#/components/responses/Error'
      */
     static viewSessions(req, res) {
       if (!req.authenticatedUser) {
