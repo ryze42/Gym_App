@@ -14,7 +14,8 @@ function Layout() {
             <button
                 onClick={() => navigate("/")}
                 className="btn btn-ghost text-lg">
-                High Street Gym !-- replace with logo --
+                High Street Gym
+                {/* <img src="../img/hsg_logo_322x105.png" alt="High Street Gym Logo" className="h-8" /> */}
             </button>
             <button
                 onClick={() => navigate("authenticate")}

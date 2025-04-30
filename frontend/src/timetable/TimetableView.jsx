@@ -13,8 +13,6 @@ function TimetableView() {
 export default TimetableView
 
 
-
-
 // USE THIS METHOD FOR TIMETABLE AND MY BOOKINGS
 // import { useCallback, useEffect, useState } from "react"
 // import { FaCoffee, FaSearch } from "react-icons/fa"

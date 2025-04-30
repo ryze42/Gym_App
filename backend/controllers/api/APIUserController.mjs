@@ -19,19 +19,19 @@ export class APIUserController {
      * 
      * @type {express.RequestHandler}
      * @openapi
-     * /api/employees/self:
+     * /api/user/self:
      *      get:
-     *          summary: "Get employee by current authentication key header"
-     *          tags: [Employees]
+     *          summary: "Get user by current authentication key header"
+     *          tags: [Users]
      *          security:
      *              - ApiKey: [] 
      *          responses:
      *              '200':
-     *                  description: 'Employee with provide authentication key'
+     *                  description: 'User with provide authentication key'
      *                  content:
      *                      application/json:
      *                          schema:
-     *                              $ref: "#/components/schemas/Employee"
+     *                              $ref: "#/components/schemas/User"
      *              default:
      *                  $ref: "#/components/responses/Error"
      */

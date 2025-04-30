@@ -1,6 +1,7 @@
 export const API_BASE_URL = "http://localhost:8080/api"
 
 /**
+ * A wrapper around fetch() to make calling the API easier.
  * 
  * @param {"GET" | "POST" | "PUT" | "PATCH" | "DELETE" | string} method - HTTP Method
  * @param {string | null} route - API route starting with /

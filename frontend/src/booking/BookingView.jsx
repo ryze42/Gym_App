@@ -1,9 +1,14 @@
 
+
 function BookingView() {
     return <section>
-        <h1>book a session</h1>
+        <h1>book a session</h1> 
     </section>
 }
+// include xml export button (top right of screen), member exports , trainer exports sessions they are in. 
+// trainer sees activity and number of people in the session.  (their sessions)
+// member sees the usual details as before. (their bookings) 
+
 
 export default BookingView
 
@@ -21,7 +26,7 @@ export default BookingView
 //     const getProducts = useCallback(() => {
         // setProducts([])
     //     setError(null)
-    
+
 //         const request = filter.length > 0
 //             ? fetchAPI("GET", "/products?filter=" + filter)
 //             : fetchAPI("GET", "/products")

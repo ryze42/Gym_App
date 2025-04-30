@@ -6,7 +6,7 @@ import { APIAuthenticationController } from "../api/APIAuthenticationController.
 import { APIUserController } from "./APIUserController.mjs"
 import { APIBlogPostController } from "../api/APIBlogPostController.mjs"
 import { APIBookingController } from "../api/APIBookingController.mjs"
-import { APISessionController } from "../api/APISessionController.mjs"
+import { APISessionTimetableController } from "./APISessionTimetableController.mjs"
 
 
 const options = {
@@ -69,10 +69,10 @@ export class APIController {
         // API authentication middleware and routes
         this.routes.use(APIAuthenticationController.middleware)
         this.routes.use(APIAuthenticationController.routes)
-        this.routes.use("/users", APIUserController.routes)
-        this.routes.use("/blog_posts", APIBlogPostController.routes)
+        this.routes.use("/self", APIUserController.routes)
+        this.routes.use("/blog", APIBlogPostController.routes)
         this.routes.use("/booking", APIBookingController.routes)
-        this.routes.use("/session", APISessionController.routes)
+        this.routes.use("/timetable", APISessionTimetableController.routes)
 
 
         // Api controllers
