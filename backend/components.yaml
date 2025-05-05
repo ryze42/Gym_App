@@ -8,7 +8,20 @@ components:
         key:
           type: string
           format: uuid
-
+    UserCredentials:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "member@example.com"
+        password:
+          type: string
+          format: password
+          example: "abc123"
     Session: 
       type: object
       required:
@@ -97,7 +110,10 @@ components:
           description: The ID of the session being booked.
           example: 5
         status:
-          type: ENUM("active", "cancelled")
+          type: string
+          enum:
+            - active
+            - cancelled
           description: Current status of the booking.
           example: "active"
       required:
@@ -233,6 +249,14 @@ components:
                   example: "Invalid email address"
 
   requestBodies:
+    UserCredentials:
+        description: Credentials for user login.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCredentials"
+
     BlogPost:
       description: Blog post object to create or update.
       required: true
@@ -284,3 +308,38 @@ components:
       description: ID of the blog post.
       schema:
         type: integer
+    BookingId:
+      name: id
+      in: path
+      required: true
+      description: ID of the booking.
+      schema:
+        type: integer
+    SessionId:
+      name: id
+      in: path
+      required: true
+      description: ID of the session.
+      schema:
+        type: integer   
+    ActivityId:
+      name: id
+      in: path
+      required: true
+      description: ID of the activity.
+      schema:
+        type: integer
+    LocationId:
+      name: id
+      in: path
+      required: true
+      description: ID of the location.
+      schema:
+        type: integer
+    UserId:
+      name: id
+      in: path
+      required: true
+      description: ID of the user.
+      schema:
+        type: integer     

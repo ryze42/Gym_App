@@ -1,16 +1,181 @@
-import { useNavigate } from "react-router"
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router";
+import { fetchAPI } from "../api.mjs";
 
 function TimetableView() {
-    const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const selectedSessionId = searchParams.get("sessionId");
 
-    return <section className="flex flex-col items-center">
-        <h1>timetable</h1>
-        <span className="p-4" style={{ color: '#c5003c' }}>There are no sessions for the next week.</span>
-        {/* <span className="loading loading-spinner loading-xl"></span> */}
+  const authKey = localStorage.getItem("authKey");
+
+  // If not authenticated, redirect to login
+  useEffect(() => {
+    if (!authKey) {
+      navigate("/authenticate");
+    }
+  }, [authKey, navigate]);
+
+  const [sessions, setSessions] = useState({});
+  const [locations, setLocations] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [locFilter, setLocFilter] = useState("all");
+  const [actFilter, setActFilter] = useState("all");
+
+  useEffect(() => {
+    if (!authKey) return; // don't fetch if not logged in
+
+    async function loadTimetable() {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams();
+        if (locFilter !== "all") params.append("location", locFilter);
+        if (selectedSessionId) params.append("sessionId", selectedSessionId);
+        const queryString = params.toString() ? `?${params.toString()}` : "";
+
+        const res = await fetchAPI(
+          "GET",
+          `/timetable${queryString}`,
+          null,
+          authKey
+        );
+        if (res.status !== 200) throw new Error(res.body.message || "Failed to load timetable");
+
+        setSessions(res.body.sessions);
+        setLocations(res.body.locations);
+        setActivities(res.body.activities);
+      } catch (e) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadTimetable();
+  }, [locFilter, selectedSessionId, authKey]);
+
+  if (!authKey) {
+    return (
+      <section className="flex flex-col items-center p-4">
+        <span className="text-red-600 p-4">Please login to view the timetable.</span>
+        <button className="btn" onClick={() => navigate('/login')}>Go to Login</button>
+      </section>
+    );
+  }
+
+  if (loading) {
+    return (
+      <section className="flex flex-col items-center p-4">
+        <span className="loading loading-spinner loading-xl"></span>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="flex flex-col items-center p-4">
+        <span className="text-red-600 p-4">{error}</span>
+      </section>
+    );
+  }
+
+  const days = Object.keys(sessions);
+  if (!days.length) {
+    return (
+      <section className="flex flex-col items-center p-4">
+        <h1 className="text-2xl font-semibold mb-4">Session Timetable</h1>
+        <span className="text-gray-500">There are no sessions for the next week.</span>
+      </section>
+    );
+  }
+
+  return (
+    <section className="flex flex-col items-center p-4 w-full max-w-4xl">
+      <h1 className="text-2xl font-bold mb-6">Session Timetable</h1>
+
+      <div className="flex gap-4 mb-6 w-full">
+        <select
+          className="select select-bordered flex-1"
+          value={locFilter}
+          onChange={(e) => setLocFilter(e.target.value)}
+        >
+          <option value="all">All Locations</option>
+          {locations.map((loc) => (
+            <option key={loc} value={loc}>
+              {loc}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="select select-bordered flex-1"
+          value={actFilter}
+          onChange={(e) => setActFilter(e.target.value)}
+        >
+          <option value="all">All Activities</option>
+          {activities.map((act) => (
+            <option key={act.id} value={act.id}>
+              {act.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {days.map((day) => (
+        <div key={day} className="w-full mb-8">
+          <h2 className="text-xl font-medium mb-4">{day}</h2>
+          {Object.entries(sessions[day])
+            .filter(([_, slots]) => actFilter === "all" || slots.some(s => s.activity.id.toString() === actFilter))
+            .map(([actName, slots]) => (
+              <div key={actName} className="mb-6">
+                <h3 className="text-lg font-semibold mb-2">{actName}</h3>
+                <ul className="space-y-4">
+                  {slots.map((slot) => (
+                    <li
+                      key={slot.session.id}
+                      className={`flex justify-between items-center p-4 border rounded-lg shadow-sm transition ${
+                        selectedSessionId == slot.session.id ? 'bg-yellow-100' : 'bg-white'
+                      }`}
+                    >
+                      <div className="space-y-1">
+                        <div className="font-semibold text-lg">
+                          {slot.session.start_time}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          📍 {slot.location.name}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          Trainers: {slot.trainers.map(t => `${t.first_name} ${t.last_name}`).join(', ')}
+                        </div>
+                      </div>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => {
+                          const newParams = new URLSearchParams();
+                          newParams.append('sessionId', slot.session.id);
+                          window.history.pushState({}, '', `?${newParams.toString()}`);
+                        }}
+                      >
+                        View
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+        </div>
+      ))}
     </section>
+  );
 }
 
-export default TimetableView
+export default TimetableView;
+
+
+
 
 
 // USE THIS METHOD FOR TIMETABLE AND MY BOOKINGS

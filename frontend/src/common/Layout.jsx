@@ -1,7 +1,4 @@
-import { CgProfile } from "react-icons/cg"
 import { IoCalendarOutline } from "react-icons/io5";
-import { FaRegCalendarAlt } from "react-icons/fa";
-import { LuCalendarDays } from "react-icons/lu";
 import { VscAccount } from "react-icons/vsc";
 import { AiOutlineSchedule } from "react-icons/ai";
 import { IoIosLogIn } from "react-icons/io";

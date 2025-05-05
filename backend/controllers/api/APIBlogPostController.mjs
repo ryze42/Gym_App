@@ -1,305 +1,249 @@
-import express from "express"
+import express from "express";
 import { BlogPostModel } from "../../models/BlogPostModel.mjs";
-import { BlogPostUserModel } from "../../models/BlogPostUserModel.mjs";
 import validator from "validator";
+import { APIAuthenticationController } from "../api/APIAuthenticationController.mjs";
 
 export class APIBlogPostController {
-    /**
-     * router for blog post routes.
-     * @type {express.Router}
-     */
-    static routes = express.Router()
+  static routes = express.Router();
 
-    static {
-        this.routes.get("/", this.viewBlogPosts);
-        this.routes.get("/blog_posts", this.viewBlogPostManagement); 
-        this.routes.get("/blog_posts/:id", this.viewBlogPostManagement);
-        this.routes.get("/blog_posts/:id", this.handleBlogPostManagement);
+  static {
+    this.routes.use(APIAuthenticationController.middleware);
+    this.routes.get("/", APIAuthenticationController.restrict("any"), this.getAllPosts);
+    this.routes.get("/:id", APIAuthenticationController.restrict("any"), this.getPostById);
+    this.routes.post("/", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.createPost);
+    this.routes.put("/:id", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.updatePost);
+    this.routes.delete("/:id", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.deletePost);
+  }
 
-        this.routes.post("/", this.handleCreateBlogPost); 
-        this.routes.post("/blog_posts", this.handleBlogPostManagement);
-        this.routes.post("/blog_posts/:id", this.handleBlogPostManagement);
-        this.routes.post("/delete-blog-post/:id", this.deleteBlogPosts);
+  /**
+   * @type {express.RequestHandler}
+   * @openapi
+   * /api/blog_posts:
+   *   get:
+   *     summary: "Get all blog posts"
+   *     tags: [BlogPosts]
+   *     security:
+   *       - ApiKey: []
+   *     responses:
+   *       '200':
+   *         description: "List of blog posts"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: "#/components/schemas/BlogPost"
+   *       default:
+   *         $ref: "#/components/responses/Error"
+   */
+  static async getAllPosts(req, res) {
+    try {
+      const posts = await BlogPostModel.getAll();
+      res.status(200).json(posts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch blog posts" });
+    }
+  }
+
+  /**
+   * @type {express.RequestHandler}
+   * @openapi
+   * /api/blog_posts/{id}:
+   *   get:
+   *     summary: "Get a single blog post by ID"
+   *     tags: [BlogPosts]
+   *     security:
+   *       - ApiKey: []
+   *     parameters:
+   *       - $ref: "#/components/parameters/BlogPostId"
+   *     responses:
+   *       '200':
+   *         description: "Blog post found"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/BlogPost"
+   *       '404':
+   *         $ref: "#/components/responses/NotFound"
+   *       default:
+   *         $ref: "#/components/responses/Error"
+   */
+  static async getPostById(req, res) {
+    try {
+      const post = await BlogPostModel.getById(req.params.id);
+      if (!post) {
+        return res.status(404).json({ message: "Blog post not found" });
+      }
+      res.status(200).json(post);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch blog post" });
+    }
+  }
+
+  /**
+   * @type {express.RequestHandler}
+   * @openapi
+   * /api/blog_posts:
+   *   post:
+   *     summary: "Create a new blog post"
+   *     tags: [BlogPosts]
+   *     security:
+   *       - ApiKey: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/BlogPost"
+   *     responses:
+   *       '201':
+   *         $ref: "#/components/responses/Created"
+   *       '400':
+   *         $ref: "#/components/responses/Error"
+   *       default:
+   *         $ref: "#/components/responses/Error"
+   */
+  static async createPost(req, res) {
+    const { subject, content } = req.body;
+
+    // Validation
+    if (!subject || !/^[\w\s\.,!?;:()\-'"]{3,100}$/.test(subject)) {
+      return res.status(400).json({ message: "Invalid subject" });
+    }
+    if (!content || content.trim().length < 10) {
+      return res.status(400).json({ message: "Invalid content" });
+    }
+    if (content.trim().split(/\s+/).length > 1000) {
+      return res.status(400).json({ message: "Content exceeds maximum word count" });
     }
 
-    /**
-     * Retrieves and renders all blog posts.
-     * @param {express.Request} req 
-     * @param {express.Response} res 
-     */
-    static viewBlogPosts(req, res) {
-        if (!req.authenticatedUser) {
-          return res.status(401).render("status.ejs", {
-            status: "Unauthorised",
-            message: "Please log in to view blog posts."
-          });
-        }
-        
-        BlogPostUserModel.getAll()
-          .then(blog_posts => {
-            res.render("blog_posts.ejs", { 
-              blog_posts, 
-              authenticatedUser: req.authenticatedUser, 
-              user: req.authenticatedUser, 
-              role: req.authenticatedUser.role  
-            });
-          })
-          .catch(error => {
-            console.error("Error fetching blog posts:", error);
-            res.status(500).send("Error fetching blog posts.");
-          });
+    try {
+      const newPost = {
+        user_id: req.authenticatedUser.id,
+        subject: validator.escape(subject),
+        content: validator.escape(content)
+      };
+      const result = await BlogPostModel.create(newPost);
+      res.status(201).json({ id: result.insertId, message: "Item created" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create blog post" });
+    }
+  }
+
+  /**
+   * @type {express.RequestHandler}
+   * @openapi
+   * /api/blog_posts/{id}:
+   *   put:
+   *     summary: "Update an existing blog post"
+   *     tags: [BlogPosts]
+   *     security:
+   *       - ApiKey: []
+   *     parameters:
+   *       - $ref: "#/components/parameters/BlogPostId"
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/BlogPost"
+   *     responses:
+   *       '200':
+   *         $ref: "#/components/responses/Updated"
+   *       '400':
+   *         $ref: "#/components/responses/Error"
+   *       '404':
+   *         $ref: "#/components/responses/NotFound"
+   *       default:
+   *         $ref: "#/components/responses/Error"
+   */
+  static async updatePost(req, res) {
+    const postId = req.params.id;
+    const { subject, content } = req.body;
+
+    // Validation (same rules as create)
+    if (!subject || !/^[\w\s\.,!?;:()\-'"]{3,100}$/.test(subject)) {
+      return res.status(400).json({ message: "Invalid subject" });
+    }
+    if (!content || content.trim().length < 10) {
+      return res.status(400).json({ message: "Invalid content" });
+    }
+    if (content.trim().split(/\s+/).length > 1000) {
+      return res.status(400).json({ message: "Content exceeds maximum word count" });
     }
 
-    /**
-     * Handles the creation of a new blog post.
-     * Runs through validation and sanitisation before sending form data to database. 
-     * @param {express.Request} req 
-     * @param {express.Response} res 
-     */
-    static handleCreateBlogPost(req, res) {
-        const formData = req.body;
-        
-        if (!req.authenticatedUser) {
-            return res.status(401).render("status.ejs", {
-                status: "Unauthorised",
-                message: "Please log in to create a blog post."
-            });
-        }
-        
-        if (!formData.subject || !/^[a-zA-Z0-9\s\.,!?;:()\-'\"]{3,100}$/.test(formData.subject)) {
-            return res.status(400).render("status.ejs", {
-                status: "Invalid input provided.",
-                message: "Please enter a valid subject between 3 and 100 characters, containing only alphanumeric characters and common punctuation."
-            });
-        }
-        
-        if (!formData.content || formData.content.trim().length < 10) {
-            return res.status(400).render("status.ejs", {
-                status: "Invalid input provided.",
-                message: "Please enter valid content with at least 10 characters."
-            });
-        }
-        
-        const wordCount = formData.content.trim().split(/\s+/).length;
-        if (wordCount > 1000) {
-            return res.status(400).render("status.ejs", {
-                status: "Invalid input provided.",
-                message: "Content exceeds the maximum limit of 1000 words. Please shorten your content."
-            });
-        }
-        
-        const blog_post = new BlogPostModel(
-            null, 
-            req.authenticatedUser.id, 
-            validator.escape(formData.subject), 
-            validator.escape(formData.content)
-        );
-        
-        BlogPostModel.create(blog_post)
-            .then(() => {
-                res.redirect("/blog"); 
-            })
-            .catch((error) => {
-                console.log(error);
-                res.status(500).render("status.ejs", {
-                    status: "Database Error",
-                    message: "Failed to create the blog post."
-                });
-            });
-    }
-    
-    /**
-     * Renders the blog post management page.
-     * Only accessible by admins. BlogPostModel.getAll fetches all blog posts that aren't deleted. 
-     * @param {express.Request} req 
-     * @param {express.Response} res 
-     */
-    static viewBlogPostManagement(req, res) {
-        if (!req.authenticatedUser || req.authenticatedUser.role !== "admin") {
-            return res.status(403).render("status.ejs", {
-                status: "Forbidden",
-                message: "Access denied :)"
-            });
-        }
-    
-        const selectedBlogPostId = req.params.id;
-    
-        BlogPostModel.getAll()
-            .then(blog_posts => {
-                const selectedBlogPost = blog_posts.find(
-                    blog_post => blog_post.id == selectedBlogPostId
-                ) ?? new BlogPostModel(null, "", "");
-    
-                res.render("crud_blog_posts.ejs", {
-                    blog_posts, 
-                    selectedBlogPost, 
-                    role: "admin",
-                    authenticatedUser: req.authenticatedUser
-                });
-            })
-            .catch(error => {
-                console.log(error);
-                res.status(500).send("Error fetching blog post.");
-            });
-    }
-    
-    /**
-     * Handles blog post creation, updating, or deletion.
-     * Runs through validation and sanitisation before sending form data to database. 
-     * @param {express.Request} req 
-     * @param {express.Response} res 
-     */
-    static handleBlogPostManagement(req, res) {
-        const selectedBlogPostId = req.params.id || req.body.id;
-        const formData = req.body;
-        const user_id = formData.user_id || req.authenticatedUser.id;
-        const action = formData.action;
+    try {
+      const existing = await BlogPostModel.getById(postId);
+      if (!existing) {
+        return res.status(404).json({ message: "Blog post not found" });
+      }
+      if (
+        req.authenticatedUser.id !== existing.user_id &&
+        req.authenticatedUser.role !== "admin"
+      ) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
 
-        if (!req.authenticatedUser || req.authenticatedUser.role !== "admin") {
-            return res.status(403).render("status.ejs", {
-                status: "Forbidden",
-                message: "Access denied :)"
-            });
-        }
-
-        if (action === "create" || action === "update") {
-            if (!formData.subject || !/^[a-zA-Z0-9\s\.,!?;:()\-'\"]{3,100}$/.test(formData.subject)) {
-                return res.status(400).render("status.ejs", {
-                    status: "Invalid input provided.",
-                    message: "Please enter a valid subject between 3 and 100 characters, containing only alphanumeric characters and common punctuation."
-                });
-            }
-            
-            if (!formData.content || formData.content.trim().length < 10) {
-                return res.status(400).render("status.ejs", {
-                    status: "Invalid input provided.",
-                    message: "Please enter valid content with at least 10 characters."
-                });
-            }
-            
-            const wordCount = formData.content.trim().split(/\s+/).length;
-            if (wordCount > 1000) {
-                return res.status(400).render("status.ejs", {
-                    status: "Invalid input provided.",
-                    message: "Content exceeds the maximum limit of 1000 words. Please shorten your content."
-                });
-            }
-        }
-
-        const blog_post = new BlogPostModel(
-            selectedBlogPostId,
-            user_id,
-            action === "create" || action === "update" ? validator.escape(formData.subject) : formData.subject,
-            action === "create" || action === "update" ? validator.escape(formData.content) : formData.content
-        );
-
-        if (action == "create") {
-            BlogPostModel.create(blog_post)
-                .then(result => {
-                    res.redirect("/blog/blog_posts");
-                })
-                .catch(error => {
-                    res.render("status.ejs", {
-                        status: "Database Error",
-                        message: "The blog post could not be created.",
-                    });
-                    console.error(error);
-                });
-        } else if (action == "update") {
-            BlogPostModel.update(blog_post)
-                .then(result => {
-                    if (result.affectedRows > 0) {
-                        res.redirect("/blog/blog_posts");
-                    } else {
-                        res.render("status.ejs", {
-                            status: "Blog post Update Failed",
-                            message: "The blog post could not be found.",
-                        });
-                    }
-                })
-                .catch(error => {
-                    res.render("status.ejs", {
-                        status: "Database Error",
-                        message: "The blog post could not be updated.",
-                    });
-                    console.error(error);
-                });
-        } else if (action == "delete") {
-            BlogPostModel.delete(blog_post.id)
-                .then(result => {
-                    if (result.affectedRows > 0) {
-                        res.redirect("/blog/blog_posts");
-                    } else {
-                        res.render("status.ejs", {
-                            status: "Blog post Deletion Failed",
-                            message: "The blog post could not be found.",
-                        });
-                    }
-                })
-                .catch(error => {
-                    res.render("status.ejs", {
-                        status: "Database Error",
-                        message: "The blog post could not be deleted.",
-                    });
-                    console.error(error);
-                });
-        } else {
-            res.render("status.ejs", {
-                status: "Invalid Action",
-                message: "The form doesn't support this action.",
-            });
-        }
+      const updated = {
+        id: postId,
+        user_id: existing.user_id,
+        subject: validator.escape(subject),
+        content: validator.escape(content)
+      };
+      await BlogPostModel.update(updated);
+      res.status(200).json({ message: "Item updated" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update blog post" });
     }
-     
-    /**
-     * Deletes a blog post by ID.
-     * Only the user who created the blog post or an admin can delete it.
-     * @param {express.Request} req 
-     * @param {express.Response} res 
-     */
-    static deleteBlogPosts(req, res) {
-        if (!req.authenticatedUser) {
-            return res.status(401).render("status.ejs", {
-                status: "Unauthorised",
-                message: "You must be logged in to delete a blog post.",
-            });
-        }
-    
-        const blogPostId = req.params.id;
-    
-        BlogPostModel.getById(blogPostId)
-            .then(blogPost => {
-                if (!blogPost) {
-                    return res.status(404).render("status.ejs", {
-                        status: "Not Found",
-                        message: "Blog post not found.",
-                    });
-                }
-                if (req.authenticatedUser.id !== blogPost.user_id && req.authenticatedUser.role !== "admin") {
-                    return res.status(403).render("status.ejs", {
-                        status: "Forbidden",
-                        message: "You do not have permission to delete this blog post.",
-                    });
-                }
-    
-                return BlogPostModel.delete(blogPostId);
-            })
-            .then(result => {
-                if (result.affectedRows > 0) {
-                    res.redirect("/blog");
-                } else {
-                    res.render("status.ejs", {
-                        status: "Deletion Failed",
-                        message: "The blog post could not be deleted.",
-                    });
-                }
-            })
-            .catch(error => {
-                console.error(error);
-                res.render("status.ejs", {
-                    status: "Database Error",
-                    message: "An error occurred while deleting the blog post.",
-                });
-            });
+  }
+
+  /**
+   * @type {express.RequestHandler}
+   * @openapi
+   * /api/blog_posts/{id}:
+   *   delete:
+   *     summary: "Delete a blog post by ID"
+   *     tags: [BlogPosts]
+   *     security:
+   *       - ApiKey: []
+   *     parameters:
+   *       - $ref: "#/components/parameters/BlogPostId"
+   *     responses:
+   *       '200':
+   *         description: "Blog post deletion successful"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message:
+   *                   type: string
+   *                   example: "Blog post deleted"
+   *       '403':
+   *         $ref: "#/components/responses/Error"
+   *       '404':
+   *         $ref: "#/components/responses/NotFound"
+   *       default:
+   *         $ref: "#/components/responses/Error"
+   */
+  static async deletePost(req, res) {
+    const postId = req.params.id;
+    try {
+      const existing = await BlogPostModel.getById(postId);
+      if (!existing) {
+        return res.status(404).json({ message: "Blog post not found" });
+      }
+      if (
+        req.authenticatedUser.id !== existing.user_id &&
+        req.authenticatedUser.role !== "admin"
+      ) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      await BlogPostModel.delete(postId);
+      res.status(200).json({ message: "Blog post deleted" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete blog post" });
     }
+  }
 }

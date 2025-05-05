@@ -116,8 +116,8 @@ export class UserModel extends DatabaseModel {
                 password = CASE 
                     WHEN ? IS NOT NULL THEN ? 
                     ELSE password 
+                END,
                 authentication_key = ?
-                END
             WHERE id = ?
         `,
         [user.first_name, user.last_name, user.role, user.email, user.password, user.password, user.authentication_key, user.id]);
