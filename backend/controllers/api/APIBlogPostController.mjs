@@ -106,7 +106,6 @@ export class APIBlogPostController {
   static async createPost(req, res) {
     const { subject, content } = req.body;
 
-    // Validation
     if (!subject || !/^[\w\s\.,!?;:()\-'"]{3,100}$/.test(subject)) {
       return res.status(400).json({ message: "Invalid subject" });
     }
@@ -161,7 +160,6 @@ export class APIBlogPostController {
     const postId = req.params.id;
     const { subject, content } = req.body;
 
-    // Validation (same rules as create)
     if (!subject || !/^[\w\s\.,!?;:()\-'"]{3,100}$/.test(subject)) {
       return res.status(400).json({ message: "Invalid subject" });
     }

@@ -58,7 +58,6 @@ export class APIUserController {
     const user = req.authenticatedUser;
     const { first_name, last_name, email, password } = req.body;
 
-    // Validation
     if (!first_name || !last_name || !email) {
       return res.status(400).json({ message: "Missing required fields" });
     }
@@ -72,12 +71,10 @@ export class APIUserController {
       return res.status(400).json({ message: "Invalid email address" });
     }
 
-    // Apply updates
     user.first_name = validator.escape(first_name.trim());
     user.last_name = validator.escape(last_name.trim());
     user.email = validator.normalizeEmail(email);
 
-    // Update password if provided
     if (password) {
       if (!validator.isLength(password, { min: 8 })) {
         return res.status(400).json({ message: "Password must be at least 8 characters" });

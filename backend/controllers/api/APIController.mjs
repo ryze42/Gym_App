@@ -3,14 +3,14 @@ import swaggerJSDoc from "swagger-jsdoc"
 import swaggerUI from "swagger-ui-express"
 import * as ApiValidator from "express-openapi-validator"
 import { APIAuthenticationController } from "../api/APIAuthenticationController.mjs"
-import { APIUserController } from "./APIUserController.mjs"
+import { APIUserController } from "../api/APIUserController.mjs"
 import { APIBlogPostController } from "../api/APIBlogPostController.mjs"
 import { APIBookingController } from "../api/APIBookingController.mjs"
 import { APISessionTimetableController } from "../api/APISessionTimetableController.mjs"
 
 
 const options = {
-    failOnErrors: true, // Whether or not to throw when parsing errors. Defaults to false.
+    failOnErrors: true, 
     definition: {
         openapi: "3.0.0",
         info: {
@@ -49,16 +49,13 @@ export class APIController {
          */
         this.routes.use("/docs", swaggerUI.serve, swaggerUI.setup(specification))
 
-        // Setup OpenAPI specification validation middleware
         this.routes.use(ApiValidator.middleware({
             apiSpec: specification,
             validateRequests: true,
             validateResponses: true,
         }))
 
-        // Setup error response for OpenAPI specification validation middleware
         this.routes.use((err, req, res, next) => {
-            // format error
             res.status(err.status || 500).json({
                 status: err.status,
                 message: err.message,

@@ -27,7 +27,7 @@ export class APIAuthenticationController {
                 req.authenticatedUser = await UserModel.getByAuthenticationKey(authenticationKey);
             } catch (error) {
                 if (error === "not found") {
-                    return res.status(404).json({ message: "Failed to authenticate - key not found" });
+                    return res.status(401).json({ message: "Failed to authenticate - key not found" });
                 }
                 return res.status(500).json({ message: "Failed to authenticate - database error" });
             }
@@ -51,6 +51,8 @@ export class APIAuthenticationController {
      *         $ref: "#/components/responses/Error"
      *       '500':
      *         $ref: "#/components/responses/Error"
+     *       default:
+     *         $ref: "#/components/responses/Error"
      *   delete:
      *     summary: "Deauthenticate"
      *     tags: [Authentication]
@@ -62,6 +64,8 @@ export class APIAuthenticationController {
      *       '401':
      *         $ref: "#/components/responses/Error"
      *       '500':
+     *         $ref: "#/components/responses/Error"
+     *       default:
      *         $ref: "#/components/responses/Error"
      */
     static async handleAuthenticate(req, res) {
@@ -116,6 +120,8 @@ export class APIAuthenticationController {
      *       '400':
      *         $ref: "#/components/responses/Error"
      *       '500':
+     *         $ref: "#/components/responses/Error"
+     *       default:
      *         $ref: "#/components/responses/Error"
      */
     static async handleRegister(req, res) {

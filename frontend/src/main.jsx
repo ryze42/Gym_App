@@ -1,44 +1,34 @@
-import { StrictMode } from 'react'
+import React, { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { createBrowserRouter, RouterProvider } from 'react-router'
+import { AuthenticationProvider } from './authentication/useAuthenticate'
 import './index.css'
-import { createBrowserRouter, RouterProvider } from "react-router"
+import Layout from './common/Layout'
 import TimetableView from './timetable/TimetableView'
 import BookingView from './booking/BookingView'
 import LoginView from './authentication/LoginView'
-import Layout from './common/Layout'
 import ProfileView from './profile/ProfileView'
 import BlogPostView from './blog/BlogPostView'
 
 const router = createBrowserRouter([
   {
-    Component: Layout,
+    element: (
+      <AuthenticationProvider>
+        <Layout />
+      </AuthenticationProvider>
+    ),
     children: [
-      {
-        index: true,
-        Component: TimetableView
-      },
-      {
-        path: "/booking",
-        Component: BookingView
-      },
-      {
-        path: "/authenticate",
-        Component: LoginView
-      },
-      {
-        path: "/profile",
-        Component: ProfileView
-      },
-      {
-        path: "/blog",
-        Component: BlogPostView
-      }
-    ]
-  }
-])
+      { index: true, element: <TimetableView /> },
+      { path: '/booking', element: <BookingView /> },
+      { path: '/authenticate', element: <LoginView /> },
+      { path: '/profile', element: <ProfileView /> },
+      { path: '/blog', element: <BlogPostView /> },
+    ],
+  },
+]);
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <RouterProvider router={router} />
-  </StrictMode>,
-)
+  </StrictMode>
+);

@@ -103,7 +103,6 @@ export class APIBookingController {
     try {
       const booking = await BookingModel.getById(req.params.id);
       if (!booking) return res.status(404).json({ message: "Booking not found" });
-      // Members can only fetch their own bookings
       if (req.authenticatedUser.role === "member" && booking.member_id !== req.authenticatedUser.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
@@ -139,7 +138,6 @@ export class APIBookingController {
   static async createBooking(req, res) {
     const { session_id, status } = req.body;
     const member_id = req.authenticatedUser.id;
-    // Basic validation
     if (!Number.isInteger(session_id) || !(status === "active" || status === "cancelled")) {
       return res.status(400).json({ message: "Invalid input" });
     }
@@ -188,7 +186,6 @@ export class APIBookingController {
     try {
       const existing = await BookingModel.getById(id);
       if (!existing) return res.status(404).json({ message: "Booking not found" });
-      // Only owner or admin
       if (req.authenticatedUser.role === "member" && existing.member_id !== req.authenticatedUser.id) {
         return res.status(403).json({ message: "Forbidden" });
       }

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
+import { useAuthenticate } from "./useAuthenticate";
 import { fetchAPI } from "../api.mjs";
 
-// CHNAGE AUTH KEY TO STORE IN DB, NOT IN LOCAL STORAGE
-
+// CHNAGE AUTH KEY TO STORE IN DB as well?
 function LoginView() {
   const [isRegister, setIsRegister] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
@@ -14,6 +14,7 @@ function LoginView() {
   const [registerPassword, setRegisterPassword] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { login, status, user } = useAuthenticate()
 
   const toggleForms = (e) => {
     e.preventDefault();
@@ -137,7 +138,3 @@ function LoginView() {
 export default LoginView;
 
 
-
-// have toggle for register
-
-// reuse register form for profile update (register is POST, profile is PUT or PATCH)

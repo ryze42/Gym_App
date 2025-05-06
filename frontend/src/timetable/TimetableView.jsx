@@ -10,7 +10,7 @@ function TimetableView() {
 
   const authKey = localStorage.getItem("authKey");
 
-  // If not authenticated, redirect to login
+  // redirect if not logged in
   useEffect(() => {
     if (!authKey) {
       navigate("/authenticate");

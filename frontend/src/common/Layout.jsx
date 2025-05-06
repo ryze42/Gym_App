@@ -3,11 +3,15 @@ import { VscAccount } from "react-icons/vsc";
 import { AiOutlineSchedule } from "react-icons/ai";
 import { IoIosLogIn } from "react-icons/io";
 import { IoChatbubblesOutline } from "react-icons/io5";
+import { TbLogout } from "react-icons/tb";
 import { Outlet, useLocation, useNavigate } from "react-router"
+import { useAuthenticate } from "../authentication/useAuthenticate"
 
 function Layout() {
     const navigate = useNavigate()
     const location = useLocation()
+
+    const {user, logout} = useAuthenticate()
 
     return <main className="max-w-[430px] min-h-screen mx-auto shadow">
         <header className="navbar justify-between bg-base-100 shadow-md">
@@ -17,11 +21,17 @@ function Layout() {
                 High Street Gym
                 {/* <img src="../img/hsg_logo_322x105.png" alt="High Street Gym Logo" className="h-8" /> */}
             </button>
-            <button
-                onClick={() => navigate("authenticate")}
-                className="btn btn-ghost text-lg">
-                <IoIosLogIn />
-            </button>
+            {user
+                    ? <button
+                        onClick={() => logout()}
+                        className="btn btn-ghost text-xl">
+                        <TbLogout />
+                    </button>
+                    : <button
+                        onClick={() => navigate("/authenticate")}
+                        className="btn btn-ghost text-xl">
+                        Login
+                    </button>}
         </header>
         <Outlet />
         <nav className="dock max-w-[430px] mx-auto">
