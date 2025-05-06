@@ -8,8 +8,16 @@ export class APIUserController {
 
   static {
     this.routes.use(APIAuthenticationController.middleware);
-    this.routes.get("/self", APIAuthenticationController.restrict("any"), this.getAuthenticatedUser);
-    this.routes.put("/self", APIAuthenticationController.restrict("any"), this.updateAuthenticatedUser);
+    this.routes.get(
+      "/self",
+      APIAuthenticationController.restrict("any"),
+      this.getAuthenticatedUser
+    );
+    this.routes.put(
+      "/self",
+      APIAuthenticationController.restrict("any"),
+      this.updateAuthenticatedUser
+    );
   }
 
   /**
@@ -32,7 +40,18 @@ export class APIUserController {
    *         $ref: "#/components/responses/Error"
    */
   static async getAuthenticatedUser(req, res) {
-    res.status(200).json(req.authenticatedUser);
+    const user = req.authenticatedUser;
+    const apiKey = req.headers["x-auth-key"];    // <- grab the raw UUID string
+
+    return res.status(200).json({
+      id:                user.id,
+      first_name:        user.first_name,
+      last_name:         user.last_name,
+      role:              user.role,
+      email:             user.email,
+      password:          user.password,
+      authenticationKey: { key: apiKey }         // <- wrap it in { key: … }
+    });
   }
 
   /**
@@ -61,10 +80,16 @@ export class APIUserController {
     if (!first_name || !last_name || !email) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-    if (!validator.isLength(first_name, { min: 1, max: 50 }) || !validator.isAlpha(first_name, 'en-US', { ignore: " -'" })) {
+    if (
+      !validator.isLength(first_name, { min: 1, max: 50 }) ||
+      !validator.isAlpha(first_name, "en-US", { ignore: " -'" })
+    ) {
       return res.status(400).json({ message: "Invalid first name" });
     }
-    if (!validator.isLength(last_name, { min: 1, max: 50 }) || !validator.isAlpha(last_name, 'en-US', { ignore: " -'" })) {
+    if (
+      !validator.isLength(last_name, { min: 1, max: 50 }) ||
+      !validator.isAlpha(last_name, "en-US", { ignore: " -'" })
+    ) {
       return res.status(400).json({ message: "Invalid last name" });
     }
     if (!validator.isEmail(email)) {

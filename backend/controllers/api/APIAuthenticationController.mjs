@@ -78,7 +78,7 @@ export class APIAuthenticationController {
                     return res.status(400).json({ message: "Invalid credentials" });
                 }
                 const authenticationKey = crypto.randomUUID();
-                user.authenticationKey = authenticationKey;
+                user.authentication_key = authenticationKey;
                 await UserModel.update(user);
                 return res.status(200).json({ key: authenticationKey });
             } catch (error) {

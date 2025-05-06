@@ -74,6 +74,6 @@ export class APIController {
 
         // Api controllers
         //this.routes.use("/products", APIProductsController.routes)
-        // this.routes.use("/users", APIUserController.routes)
+        this.routes.use("/user", APIUserController.routes)
     }
 }

@@ -5,11 +5,9 @@ import { useNavigate } from "react-router"
 export const AuthenticationContext = createContext(null)
 
 export function AuthenticationProvider({ children }) {
-    // User and status state to be shared via context
     const [user, setUser] = useState(null)
     const [status, setStatus] = useState("resuming")
 
-    // Attempt to reload user from authKey saved in local storage
     useEffect(() => {
         const authenticationKey = localStorage.getItem("authKey")
 
@@ -27,7 +25,6 @@ export function AuthenticationProvider({ children }) {
         }
     }, [setUser, setStatus])
 
-    // Provide user and status state to all children via context
     return <AuthenticationContext.Provider value={[user, setUser, status, setStatus]}>
         {children}
     </AuthenticationContext.Provider>
@@ -97,11 +94,5 @@ export function useAuthenticate(restrictToRoles = null) {
         }
     }, [user, status, restrictToRoles, navigate])
 
-    return {
-        user,
-        login,
-        logout,
-        refresh,
-        status,
-    }
+    return {user,login,logout,refresh,status,}
 }

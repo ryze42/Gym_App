@@ -122,7 +122,7 @@ export class UserModel extends DatabaseModel {
         `,
         [user.first_name, user.last_name, user.role, user.email, user.password, user.password, user.authentication_key, user.id]);
     }
-                                                                                            // user.authenticationKey???
+
     /**
      * Creates a new user in the database
      * @param {UserModel} users
