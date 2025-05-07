@@ -67,7 +67,7 @@ export class APIController {
         this.routes.use(APIAuthenticationController.middleware)
         this.routes.use(APIAuthenticationController.routes)
         this.routes.use("/self", APIUserController.routes)
-        this.routes.use("/blog", APIBlogPostController.routes)
+        this.routes.use("/blog_posts", APIBlogPostController.routes)
         this.routes.use("/booking", APIBookingController.routes)
         this.routes.use("/timetable", APISessionTimetableController.routes)
         this.routes.use("/user", APIUserController.routes)

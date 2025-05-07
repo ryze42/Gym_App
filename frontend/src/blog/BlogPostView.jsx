@@ -6,49 +6,118 @@ function BlogPosts({ initialPosts = [], currentUser }) {
   const [blogPosts, setBlogPosts] = useState(initialPosts);
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Fetch posts on component mount
   useEffect(() => {
+    setIsLoading(true);
     fetchAPI("GET", "/api/blog_posts")
-      .then(res => setBlogPosts(res.body))
-      .catch(err => console.error("Failed to load posts", err));
+      .then(res => {
+        console.log("API Response:", res); // Debug: log the API response
+        if (Array.isArray(res)) {
+          setBlogPosts(res);
+        } else if (res && Array.isArray(res.body)) {
+          setBlogPosts(res.body);
+        } else {
+          console.error("Unexpected API response format:", res);
+          setError("Unexpected data format received");
+        }
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to load posts", err);
+        setError("Failed to load blog posts");
+        setIsLoading(false);
+      });
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newPost = { subject, content };
     try {
-      const res = await fetch('/blog', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newPost),
-      });
-      if (res.ok) {
-        const created = await res.json();
-        setBlogPosts([created, ...blogPosts]);
+      const response = await fetchAPI('POST', '/api/blog_posts', newPost);
+      console.log("Create response:", response);
+      
+      if (response && response.id) {
+        // The API returns only id and message, so we need to construct a full post object
+        const createdPost = {
+          id: response.id,
+          user_id: currentUser.id,
+          subject: subject,
+          content: content,
+          user: {
+            first_name: currentUser.first_name || currentUser.username || "Current",
+            last_name: currentUser.last_name || "User"
+          }
+        };
+        
+        setBlogPosts([createdPost, ...blogPosts]);
         setSubject('');
         setContent('');
-      } else console.error('Failed to create post');
+      } else {
+        console.error('Failed to create post or unexpected response format');
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Error creating post:", err);
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this blog post?')) return;
     try {
-      const res = await fetch(`/blog/delete-blog-post/${id}`, { method: 'POST' });
-      if (res.ok) setBlogPosts(blogPosts.filter(p => p.blog_post.id !== id));
+      const response = await fetchAPI('DELETE', `/api/blog_posts/${id}`);
+      console.log("Delete response:", response);
+      
+      if (response) {
+        // Remove the deleted post from state
+        setBlogPosts(blogPosts.filter(post => post.id !== id));
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Error deleting post:", err);
     }
   };
 
+  const renderBlogPost = (post) => {
+    // Check if we have user info
+    const hasUserInfo = post.user && (post.user.first_name || post.user.last_name);
+    
+    return (
+      <div className="card bg-white text-black shadow-md" key={post.id}>
+        <div className="card-body flex justify-between items-start">
+          <div className="space-y-1">
+            {hasUserInfo && (
+              <p className="text-sm">
+                <span className="font-semibold text-gray-700">User:</span>{' '}
+                {post.user.first_name || ''} {post.user.last_name || ''}
+              </p>
+            )}
+            <p className="text-sm">
+              <span className="font-semibold text-gray-700">Subject:</span> {post.subject}
+            </p>
+            <p className="text-sm">
+              <span className="font-semibold text-gray-700">Content:</span> {post.content}
+            </p>
+          </div>
+          {(currentUser && (currentUser.id === post.user_id || currentUser.role === 'admin')) && (
+            <button
+              className="btn btn-error btn-sm"
+              onClick={() => handleDelete(post.id)}
+              aria-label="Delete post"
+            >
+              ❌
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="text-white min-h-screen flex flex-col">
       <main className="container mx-auto px-4 py-8 flex flex-col flex-1">
-        <h1 className="text-3xl font-bold text-center mb-6">Blog Posts</h1>
-        <div className="flex flex-col lg:flex-row gap-6">
-          <div className="card bg-white text-black shadow-lg flex-1">
+        <h1 className="text-2xl font-bold text-center mb-6">Blog Posts</h1>
+        <div className="flex flex-col gap-6"> 
+          <div className="card bg-white text-black shadow-lg">
             <div className="card-body">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -87,34 +156,13 @@ function BlogPosts({ initialPosts = [], currentUser }) {
             </div>
           </div>
 
-          <div className="space-y-4 flex-1 overflow-y-auto max-h-[60vh]">
-            {blogPosts.length > 0 ? (
-              blogPosts.map(blog_post => (
-                <div className="card bg-white text-black shadow-md" key={blog_post.blog_post.id}>
-                  <div className="card-body flex justify-between items-start">
-                    <div className="space-y-1">
-                      <p className="text-sm">
-                        <span className="font-semibold text-gray-700">User:</span> {blog_post.user.first_name} {blog_post.user.last_name}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-semibold text-gray-700">Subject:</span> {blog_post.blog_post.subject}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-semibold text-gray-700">Content:</span> {blog_post.blog_post.content}
-                      </p>
-                    </div>
-                    {(currentUser && (currentUser.id === blog_post.blog_post.user_id || currentUser.role === 'admin')) && (
-                      <button
-                        className="btn btn-error btn-sm"
-                        onClick={() => handleDelete(blog_post.blog_post.id)}
-                        aria-label="Delete post"
-                      >
-                        ❌
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))
+          <div className="space-y-4 overflow-y-auto max-h-[60vh]">
+            {isLoading ? (
+              <p className="text-center text-lg mt-4 text-gray-300">Loading blog posts...</p>
+            ) : error ? (
+              <p className="text-center text-lg mt-4 text-red-500">{error}</p>
+            ) : blogPosts && blogPosts.length > 0 ? (
+              blogPosts.map(post => renderBlogPost(post))
             ) : (
               <p className="text-center text-lg mt-4 text-gray-300">No blog posts available.</p>
             )}
