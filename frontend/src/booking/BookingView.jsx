@@ -1,15 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router";
+import { useAuthenticate } from "../authentication/useAuthenticate";
 import { CiExport } from "react-icons/ci";
 
 function BookingView() {
     const [isModalOpen, setModalOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    const searchParams = new URLSearchParams(location.search);
+    const selectedSessionId = searchParams.get("sessionId");
+  
+    const authKey = localStorage.getItem("authKey");
+    
+    // redirect if not logged in
+    useEffect(() => {
+      if (!authKey) {
+        navigate("/authenticate");
+      }
+    }, [authKey, navigate]);  
 
     return (
         <section className="flex flex-col items-center relative">
-            <h1>book a session</h1>
+            <h1 className="text-2xl font-semibold mb-4">My Bookings</h1>
 
             <button
                 onClick={() => setModalOpen(true)}

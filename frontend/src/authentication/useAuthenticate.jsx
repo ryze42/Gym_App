@@ -21,7 +21,7 @@ export function AuthenticationProvider({ children }) {
                     setStatus(null)
                 })
         } else {
-            setStatus(null)
+            setStatus(null)// chnage to updated github version ( should be "...")
         }
     }, [setUser, setStatus])
 

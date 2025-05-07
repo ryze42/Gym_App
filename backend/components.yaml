@@ -8,6 +8,7 @@ components:
         key:
           type: string
           format: uuid
+
     UserCredentials:
       type: object
       required:
@@ -46,7 +47,7 @@ components:
           example: "2025-05-01"
         start_time:
           type: string
-          format: time
+          
           description: The start time of the session.
           example: "10:00:00"
         location_id:
@@ -67,7 +68,6 @@ components:
         - role
         - email
         - password
-        - authenticationKey
       properties:
         id:
           type: number
@@ -89,9 +89,6 @@ components:
         password: 
           type: string
           example: "********"
-        authenticationKey:  
-          $ref: '#/components/schemas/AuthenticationKey'
-
     Booking:
       type: object
       properties:

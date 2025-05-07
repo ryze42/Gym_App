@@ -70,10 +70,6 @@ export class APIController {
         this.routes.use("/blog", APIBlogPostController.routes)
         this.routes.use("/booking", APIBookingController.routes)
         this.routes.use("/timetable", APISessionTimetableController.routes)
-
-
-        // Api controllers
-        //this.routes.use("/products", APIProductsController.routes)
         this.routes.use("/user", APIUserController.routes)
     }
 }
