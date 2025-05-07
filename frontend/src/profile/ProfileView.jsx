@@ -19,8 +19,6 @@ function ProfileView() {
   const [success, setSuccess] = useState(null);
   const [updated, setUpdated] = useState(false);
 
-  
-
   useEffect(() => {
     if (!authKey) {
       navigate("/authenticate");
@@ -83,7 +81,7 @@ function ProfileView() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-base-200 p-4">
       <div className="card w-full max-w-md shadow-xl bg-base-100 p-6 flex flex-col items-center">
-        <VscAccount className="text-6xl text-primary mb-2" />
+        <VscAccount className="text-8xl text-primary mb-2" />
         <h2 className="text-lg font-semibold text-center mb-4">Edit Profile</h2>
 
         {error && <div className="alert alert-error mb-4 w-full">{error}</div>}

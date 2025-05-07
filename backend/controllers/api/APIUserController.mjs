@@ -104,7 +104,7 @@ export class APIUserController {
       if (!validator.isLength(password, { min: 8 })) {
         return res.status(400).json({ message: "Password must be at least 8 characters" });
       }
-      user.password = await UserModel.hashPassword(password);
+      // user.password = await UserModel.hashPassword(password);
     }
 
     try {

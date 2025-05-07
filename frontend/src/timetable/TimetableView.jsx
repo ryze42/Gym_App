@@ -10,7 +10,6 @@ function TimetableView() {
 
   const authKey = localStorage.getItem("authKey");
 
-  // Redirect if not logged in
   useEffect(() => {
     if (!authKey) navigate("/authenticate");
   }, [authKey, navigate]);
@@ -52,7 +51,6 @@ function TimetableView() {
       });
   }, [authKey, locFilter, selectedSessionId]);
 
-  // Fetch data on mount and when filters change
   useEffect(() => {
     getTimetable();
   }, [getTimetable]);
