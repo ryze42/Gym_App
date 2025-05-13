@@ -9,6 +9,7 @@ function BlogPostView({ initialPosts = [] }) {
   const [content, setContent] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const authKey = localStorage.getItem('authKey');
   const { user } = useAuthenticate();
   const navigate = useNavigate();
@@ -20,57 +21,73 @@ function BlogPostView({ initialPosts = [] }) {
     if (!authKey) navigate('/authenticate');
   }, [authKey, navigate]);
 
-  useEffect(() => {
+  const fetchPosts = async () => {
     setIsLoading(true);
-    fetchAPI('GET', '/blog_posts', null, authKey)
-      .then(res => {
-        if (res.status && res.status !== 200) throw new Error(res.message || `Error ${res.status}`);
-        const posts = Array.isArray(res) ? res : res.body;
-        if (!Array.isArray(posts)) throw new Error('Unexpected data format');
+    try {
+      const res = await fetchAPI('GET', '/blog_posts', null, authKey);
+      if (res.status && res.status !== 200) throw new Error(res.message || `Error ${res.status}`);
+      
+      const posts = Array.isArray(res) ? res : res.body;
+      if (!Array.isArray(posts)) throw new Error('Unexpected data format');
 
-        const sorted = posts.slice().sort((a, b) => {
-          if (a.created_at && b.created_at) {
-            return new Date(b.created_at) - new Date(a.created_at);
-          }
-          return b.id - a.id;
-        });
+      const sorted = posts.slice().sort((a, b) => {
+        if (a.created_at && b.created_at) {
+          return new Date(b.created_at) - new Date(a.created_at);
+        }
+        return b.id - a.id;
+      });
 
-        setBlogPosts(sorted);
-      })
-      .catch(err => {
-        console.error(err);
-        setError(err.message);
-      })
-      .finally(() => setIsLoading(false));
+      setBlogPosts(sorted);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching posts:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (authKey) {
+      fetchPosts();
+    }
   }, [authKey]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) return;
 
+    setIsSubmitting(true);
     const newPost = { subject, content, user_id: user.id };
+    
     try {
       const response = await fetchAPI('POST', '/blog_posts', newPost, authKey);
-      if (response && response.id) {
-        const createdPost = {
-          id: response.id,
-          user_id: user.id,
-          subject,
-          content,
-          user: {
-            first_name: user.first_name || user.username || 'Current',
-            last_name: user.last_name || ''
-          },
-          created_at: new Date().toISOString(),
-        };
-        setBlogPosts(prev => [createdPost, ...prev]);
-        setSubject('');
-        setContent('');
-      } else {
-        console.error('Failed to create post or unexpected response format');
-      }
+      const postId = response && response.body && response.body.id 
+        ? response.body.id 
+        : (response && response.id ? response.id : Date.now());
+      
+      const createdPost = {
+        id: postId,
+        user_id: user.id,
+        subject,
+        content,
+        user: {
+          first_name: user.first_name || user.username || 'Current',
+          last_name: user.last_name || ''
+        },
+        
+      };
+      
+      setBlogPosts(prev => [createdPost, ...prev]);
+      setSubject('');
+      setContent('');
+      
+      console.log('Post created successfully with ID:', postId);
     } catch (err) {
       console.error('Error creating post:', err);
+      setError('Error creating post: ' + (err.message || 'Unknown error'));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -81,6 +98,7 @@ function BlogPostView({ initialPosts = [] }) {
       if (response) setBlogPosts(prev => prev.filter(post => post.id !== id));
     } catch (err) {
       console.error('Error deleting post:', err);
+      setError('Error deleting post: ' + (err.message || 'Unknown error'));
     }
   };
 
@@ -101,9 +119,18 @@ function BlogPostView({ initialPosts = [] }) {
             <p className="text-sm">
               <span className="font-semibold text-gray-700">Content:</span> {post.content}
             </p>
+            {post.created_at && (
+              <p className="text-xs text-gray-500">
+                Posted: {new Date(post.created_at).toLocaleString()}
+              </p>
+            )}
           </div>
           {(user && (user.id === post.user_id || user.role === 'admin')) && (
-            <button className="btn btn-error btn-sm" onClick={() => handleDelete(post.id)} aria-label="Delete post">
+            <button 
+              className="btn btn-error btn-sm" 
+              onClick={() => handleDelete(post.id)} 
+              aria-label="Delete post"
+            >
               ❌
             </button>
           )}
@@ -116,6 +143,18 @@ function BlogPostView({ initialPosts = [] }) {
     <div className="text-white min-h-screen flex flex-col">
       <main className="container mx-auto px-4 py-8 flex flex-col flex-1">
         <h1 className="text-2xl font-bold text-center mb-6">Blog Posts</h1>
+
+        {error && (
+          <div className="alert alert-error mb-4">
+            <span>{error}</span>
+            <button 
+              className="btn btn-sm btn-ghost" 
+              onClick={() => setError(null)}
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
         <div className="card bg-white text-black shadow-lg mb-6">
           <div className="card-body">
@@ -152,11 +191,19 @@ function BlogPostView({ initialPosts = [] }) {
               </div>
 
               <div className="flex justify-between mt-4">
-                <button type="button" className="btn btn-outline" onClick={() => { setSubject(''); setContent(''); }}>
+                <button 
+                  type="button" 
+                  className="btn btn-outline" 
+                  onClick={() => { setSubject(''); setContent(''); }}
+                >
                   Clear
                 </button>
-                <button type="submit" className="btn btn-primary" disabled={!(subjectValid && contentValid)}>
-                  Create New Blog Post
+                <button 
+                  type="submit" 
+                  className="btn btn-primary" 
+                  disabled={!(subjectValid && contentValid) || isSubmitting}
+                >
+                  {isSubmitting ? 'Posting...' : 'Create New Blog Post'}
                 </button>
               </div>
             </form>
@@ -164,10 +211,8 @@ function BlogPostView({ initialPosts = [] }) {
         </div>
 
         <div className="space-y-4 overflow-y-auto max-h-[60vh]">
-          {isLoading ? (
+          {isLoading && blogPosts.length === 0 ? (
             <p className="text-center text-lg mt-4 text-gray-300">Loading blog posts...</p>
-          ) : error ? (
-            <p className="text-center text-lg mt-4 text-red-500">{error}</p>
           ) : blogPosts.length > 0 ? (
             blogPosts.map(renderBlogPost)
           ) : (

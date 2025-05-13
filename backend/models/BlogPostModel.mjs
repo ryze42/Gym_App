@@ -75,6 +75,25 @@ export class BlogPostModel extends DatabaseModel {
     }
 
     /**
+     * Partially updates an existing blog post in database with a PATCH
+     * @param {Partial<BlogPostModel>} blog_posts 
+     * @returns {Promise<mysql.OkPacket>}
+     */
+    static patch(blog_posts) {
+        return this.query(`
+            UPDATE blog_posts
+            SET
+                user_id = COALESCE(?, user_id),
+                subject = COALESCE(?, subject),
+                content = COALESCE(?, content)
+            WHERE id = ?
+        `,
+            [blog_posts.user_id, blog_posts.subject, blog_posts.content, blog_posts.id]
+        );
+    }
+
+
+    /**
      * Create a new blog post in database
      * @param {BlogPostModel} blog_posts
      * @returns {Promise<mysql.OkPacket>}

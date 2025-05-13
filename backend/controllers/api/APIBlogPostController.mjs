@@ -1,5 +1,6 @@
 import express from "express";
 import { BlogPostModel } from "../../models/BlogPostModel.mjs";
+import { BlogPostUserModel } from "../../models/BlogPostUserModel.mjs";
 import validator from "validator";
 import { APIAuthenticationController } from "../api/APIAuthenticationController.mjs";
 
@@ -13,6 +14,7 @@ export class APIBlogPostController {
     this.routes.post("/", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.createPost);
     this.routes.put("/:id", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.updatePost);
     this.routes.delete("/:id", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.deletePost);
+    this.routes.patch("/:id", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.patchPost);
   }
 
   /**
@@ -38,12 +40,27 @@ export class APIBlogPostController {
    */
   static async getAllPosts(req, res) {
     try {
-      const posts = await BlogPostModel.getAll();
+      const blogPostUserModels = await BlogPostUserModel.getAll();
+      const posts = blogPostUserModels.map(entry => {
+        const { id, user_id, subject, content } = entry.blog_post;
+        const user = entry.user || null;
+
+        return {
+          id,
+          user_id,
+          subject,
+          content,
+          user, 
+        };
+      });
+
       res.status(200).json(posts);
     } catch (error) {
+      console.error(error);
       res.status(500).json({ message: "Failed to fetch blog posts" });
     }
   }
+
 
   /**
    * @type {express.RequestHandler}
@@ -242,6 +259,79 @@ export class APIBlogPostController {
       res.status(200).json({ message: "Blog post deleted" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete blog post" });
+    }
+  }
+
+  /**
+   * @type {express.RequestHandler}
+   * @openapi
+   * /api/blog_posts/{id}:
+   *   patch:
+   *     summary: "Partially update a blog post"
+   *     tags: [BlogPosts]
+   *     security:
+   *       - ApiKey: []
+   *     parameters:
+   *       - $ref: "#/components/parameters/BlogPostId"
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               subject:
+   *                 type: string
+   *               content:
+   *                 type: string
+   *     responses:
+   *       '200':
+   *         description: "Blog post partially updated"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message:
+   *                   type: string
+   *                   example: "Blog post patched"
+   *       '400':
+   *         $ref: "#/components/responses/Error"
+   *       '403':
+   *         $ref: "#/components/responses/Error"
+   *       '404':
+   *         $ref: "#/components/responses/NotFound"
+   *       default:
+   *         $ref: "#/components/responses/Error"
+   */
+  static async patchPost(req, res) {
+    const postId = req.params.id;
+    const { subject, content } = req.body;
+
+    try {
+      const existing = await BlogPostModel.getById(postId);
+      if (!existing) {
+        return res.status(404).json({ message: "Blog post not found" });
+      }
+
+      if (
+        req.authenticatedUser.id !== existing.user_id &&
+        req.authenticatedUser.role !== "admin"
+      ) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const patchData = {
+        id: postId,
+        user_id: undefined,
+        subject: subject ? validator.escape(subject) : undefined,
+        content: content ? validator.escape(content) : undefined
+      };
+
+      await BlogPostModel.patch(patchData);
+      res.status(200).json({ message: "Blog post patched" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to patch blog post" });
     }
   }
 }
