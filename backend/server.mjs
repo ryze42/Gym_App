@@ -14,11 +14,9 @@ import cors from "cors"
 const app = express()
 const port = 8080
 
-// Enable cross-origin resources sharing (CORS) and preflight OPTIONS requests
 app.use(
     cors({
-        origin: "http://localhost:5173", // Allow all origins, CHANGE TO BELOW  
-        // origin: "http://localhost:8080", // Allow only backend origin 
+        origin: "http://localhost:5173", 
     })
 )
 

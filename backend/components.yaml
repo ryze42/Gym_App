@@ -9,6 +9,26 @@ components:
           type: string
           format: uuid
 
+    BookingWithDetails:
+      type: object
+      properties:
+        booking:
+          $ref: "#/components/schemas/Booking"
+        session:
+          $ref: "#/components/schemas/Session"
+        trainer:
+          $ref: "#/components/schemas/User"
+        activity:
+          $ref: "#/components/schemas/Activity"
+        location:
+          $ref: "#/components/schemas/Location"
+      required:
+        - booking
+        - session
+        - trainer
+        - activity
+        - location
+        
     UserCredentials:
       type: object
       required:

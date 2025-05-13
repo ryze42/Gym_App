@@ -1,5 +1,6 @@
 import express from "express";
 import { BookingModel } from "../../models/BookingModel.mjs";
+import { BookingSessionTrainerActivityLocationModel } from "../../models/BookingSessionTrainerActivityLocationModel.mjs";
 import { APIAuthenticationController } from "../api/APIAuthenticationController.mjs";
 
 export class APIBookingController {
@@ -62,14 +63,14 @@ export class APIBookingController {
    *             schema:
    *               type: array
    *               items:
-   *                 $ref: "#/components/schemas/Booking"
+   *                 $ref: "#/components/schemas/BookingWithDetails"
    *       default:
    *         $ref: "#/components/responses/Error"
    */
   static async getMyBookings(req, res) {
     try {
       const userId = req.authenticatedUser.id;
-      const bookings = await BookingModel.getByMemberId(userId);
+      const bookings = await BookingSessionTrainerActivityLocationModel.getAll(userId);
       res.status(200).json(bookings);
     } catch (err) {
       res.status(500).json({ message: "Failed to fetch user bookings" });

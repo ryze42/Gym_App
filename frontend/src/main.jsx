@@ -26,7 +26,7 @@ const router = createBrowserRouter([
     ],
   },
 ]);
-console.log("from main");
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <RouterProvider router={router} />

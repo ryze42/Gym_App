@@ -197,7 +197,7 @@ export class BookingController {
     static viewMyBookings(req, res) {
         if (!req.authenticatedUser) {
             return res.status(401).render("status.ejs", {
-                status: "Unauthorized",
+                status: "Unauthorised",
                 message: "Please log in to view your bookings."
             });
         }
