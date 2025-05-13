@@ -71,11 +71,30 @@ function TimetableView() {
     </section>
   );
 
-  const days = Object.keys(sessions);
+  const filteredSessions = {};
+  Object.entries(sessions).forEach(([day, dayActivities]) => {
+    const filteredActivities = {};
+    
+    Object.entries(dayActivities).forEach(([actName, slots]) => {
+      const filteredSlots = slots.filter(slot => 
+        (actFilter === "all" || slot.activity.id.toString() === actFilter)
+      );
+      
+      if (filteredSlots.length > 0) {
+        filteredActivities[actName] = filteredSlots;
+      }
+    });
+    
+    if (Object.keys(filteredActivities).length > 0) {
+      filteredSessions[day] = filteredActivities;
+    }
+  });
+
+  const days = Object.keys(filteredSessions);
   if (!days.length) return (
     <section className="flex flex-col items-center p-4">
       <h1 className="text-2xl font-semibold mb-4">Session Timetable</h1>
-      <span className="text-gray-500">There are no sessions for the next week.</span>
+      <span className="text-gray-500">No sessions match your filter criteria.</span>
     </section>
   );
 
@@ -107,40 +126,38 @@ function TimetableView() {
       {days.map(day => (
         <div key={day} className="w-full mb-8">
           <h2 className="text-xl font-medium mb-4">{day}</h2>
-          {Object.entries(sessions[day])
-            .filter(([_, slots]) => actFilter === "all" || slots.some(s => s.activity.id.toString() === actFilter))
-            .map(([actName, slots]) => (
-              <div key={actName} className="mb-6">
-                <h3 className="text-lg font-semibold mb-2">{actName}</h3>
-                <ul className="space-y-4">
-                  {slots.map(slot => (
-                    <li
-                      key={slot.session.id}
-                      className={`flex justify-between items-center p-4 border rounded-lg shadow-sm transition ${
-                        selectedSessionId === slot.session.id.toString() ? 'bg-yellow-100' : 'bg-white'
-                      }`}
+          {Object.entries(filteredSessions[day]).map(([actName, slots]) => (
+            <div key={actName} className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">{actName}</h3>
+              <ul className="space-y-4">
+                {slots.map(slot => (
+                  <li
+                    key={slot.session.id}
+                    className={`flex justify-between items-center p-4 border rounded-lg shadow-sm transition ${
+                      selectedSessionId === slot.session.id.toString() ? 'bg-yellow-100' : 'bg-white'
+                    }`}
+                  >
+                    <div className="space-y-1">
+                      <div className="font-semibold text-lg text-black">{slot.session.start_time}</div>
+                      <div className="text-sm text-gray-600">📍 {slot.location.name}</div>
+                      <div className="text-sm text-gray-600">Trainers: {slot.trainers.map(t => `${t.first_name} ${t.last_name}`).join(', ')}</div>
+                    </div>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => {
+                        const params = new URLSearchParams();
+                        params.set('sessionId', slot.session.id);
+                        window.history.pushState({}, '', `?${params.toString()}`);
+                        getTimetable();
+                      }}
                     >
-                      <div className="space-y-1">
-                        <div className="font-semibold text-lg text-black">{slot.session.start_time}</div>
-                        <div className="text-sm text-gray-600">📍 {slot.location.name}</div>
-                        <div className="text-sm text-gray-600">Trainers: {slot.trainers.map(t => `${t.first_name} ${t.last_name}`).join(', ')}</div>
-                      </div>
-                      <button
-                        className="btn btn-primary"
-                        onClick={() => {
-                          const params = new URLSearchParams();
-                          params.set('sessionId', slot.session.id);
-                          window.history.pushState({}, '', `?${params.toString()}`);
-                          getTimetable();
-                        }}
-                      >
-                        View
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+                      View
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       ))}
     </section>
