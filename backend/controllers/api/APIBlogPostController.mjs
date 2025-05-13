@@ -94,7 +94,7 @@ export class APIBlogPostController {
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: "#/components/schemas/BlogPost"
+   *             $ref: "#/components/schemas/BlogPostInput"
    *     responses:
    *       '201':
    *         $ref: "#/components/responses/Created"

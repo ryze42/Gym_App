@@ -28,7 +28,7 @@ components:
         - trainer
         - activity
         - location
-        
+
     UserCredentials:
       type: object
       required:
@@ -195,6 +195,16 @@ components:
           example: "content goes here"
       required:
         - user_id
+        - subject
+        - content
+    BlogPostInput:
+      type: object
+      properties:
+        subject:
+          type: string
+        content:
+          type: string
+      required:
         - subject
         - content
 
