@@ -190,17 +190,19 @@ function TimetableView() {
         </div>
       ))}
       {showModal && selectedSlot && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div className="fixed inset-0 backdrop-blur-md flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-full max-w-md relative text-black">
             <button
-              className="absolute top-2 right-2 text-gray-600"
+              className="absolute top-3 right-3 p-3 btn btn-outline btn-error"
               onClick={() => {
                 setShowModal(false);
                 setSelectedSlot(null);
               }}
             >
-              ✕
+              <span className="text-2xl font-semibold">✕</span>
             </button>
+
+
             <h2 className="text-xl font-bold mb-4">Book a Session</h2>
             <p className="mb-2"><strong>Activity:</strong> {selectedSlot.activity.name}</p>
             <p className="mb-2"><strong>Time & Date:</strong> {selectedSlot.session.start_time} on {new Date(selectedSlot.session.date).toDateString()}</p>
@@ -208,7 +210,7 @@ function TimetableView() {
 
             <form action="/booking/confirm_session_booking" method="POST">
               <label htmlFor="sessionSelect" className="block mb-1 font-medium">Select Trainer:</label>
-              
+
               <select
                 id="sessionSelect"
                 name="session_id"
@@ -229,6 +231,7 @@ function TimetableView() {
                   </option>
                 )}
               </select>
+
               <button type="submit" className="btn btn-primary w-full">Confirm Booking</button>
             </form>
           </div>
