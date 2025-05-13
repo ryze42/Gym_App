@@ -9,9 +9,8 @@ import { useAuthenticate } from "../authentication/useAuthenticate"
 function Layout() {
     const navigate = useNavigate()
     const location = useLocation()
-
     const {user, logout} = useAuthenticate()
-
+//// PRIVACY POLICY LINK???
     return <main className="max-w-[430px] min-h-screen mx-auto shadow">
         <header className="navbar justify-between bg-base-100 shadow-md">
             <button

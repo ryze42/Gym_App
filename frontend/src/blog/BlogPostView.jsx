@@ -17,7 +17,6 @@ function BlogPosts({ initialPosts = [], currentUser }) {
         if (res.status && res.status !== 200) {
           throw new Error(res.message || `Error ${res.status}`);
         }
-        // now res is your real posts array
         const posts = Array.isArray(res) ? res : res.body;
         if (!Array.isArray(posts)) {
           throw new Error("Unexpected data format");
@@ -40,7 +39,6 @@ function BlogPosts({ initialPosts = [], currentUser }) {
       console.log("Create response:", response);
       
       if (response && response.id) {
-        // The API returns only id and message, so we need to construct a full post object
         const createdPost = {
           id: response.id,
           user_id: currentUser.id,
@@ -70,7 +68,6 @@ function BlogPosts({ initialPosts = [], currentUser }) {
       console.log("Delete response:", response);
       
       if (response) {
-        // Remove the deleted post from state
         setBlogPosts(blogPosts.filter(post => post.id !== id));
       }
     } catch (err) {
@@ -79,7 +76,6 @@ function BlogPosts({ initialPosts = [], currentUser }) {
   };
 
   const renderBlogPost = (post) => {
-    // Check if we have user info
     const hasUserInfo = post.user && (post.user.first_name || post.user.last_name);
     
     return (
