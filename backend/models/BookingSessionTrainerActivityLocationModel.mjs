@@ -98,4 +98,51 @@ export class BookingSessionTrainerActivityLocationModel extends DatabaseModel {
                 };
             });
     }
+
+    /**
+     * Retrieves all bookings for a specific user.
+     * This method joins the bookings, sessions, users, activities, and locations tables to gather the details.
+     * @param {number|string} userId - The ID of the user for whom to retrieve bookings.
+     * @returns {Promise<Array<BookingSessionTrainerActivityLocationModel>>} - A promise that resolves 
+     * to an array of BookingSessionTrainerActivityLocationModel instances.
+     */
+    static getAllForMember(memberId) {
+        const sql = `
+            SELECT bookings.*, sessions.*, users.*, activities.*, locations.*
+            FROM bookings
+            INNER JOIN sessions ON bookings.session_id = sessions.id
+            INNER JOIN users ON sessions.trainer_id = users.id AND users.role = 'trainer'
+            INNER JOIN activities ON sessions.activity_id = activities.id
+            INNER JOIN locations ON sessions.location_id = locations.id
+            WHERE bookings.member_id = ?
+            AND sessions.deleted = 0
+            ORDER BY sessions.date ASC, sessions.start_time ASC
+        `;
+        return this.query(sql, [memberId])
+            .then(result => result.map(row => this.tableToModel(row)));
+    }
+
+    /**
+     * Retrieves all bookings for a specific trainer by their ID.
+     * This method joins the bookings, sessions, users, activities, and locations tables to gather the details.
+     * @param {number|string} trainerId - The ID of the trainer for whom to retrieve bookings.
+     * @returns {Promise<Array<BookingSessionTrainerActivityLocationModel>>} - A promise that resolves 
+     * to an array of BookingSessionTrainerActivityLocationModel instances.
+     */
+    static getAllByTrainer(trainerId) {
+        const sql = `
+            SELECT bookings.*, sessions.*, users.*, activities.*, locations.*
+            FROM bookings
+            INNER JOIN sessions ON bookings.session_id = sessions.id
+            INNER JOIN users ON sessions.trainer_id = users.id AND users.role = 'trainer'
+            INNER JOIN activities ON sessions.activity_id = activities.id
+            INNER JOIN locations ON sessions.location_id = locations.id
+            WHERE sessions.trainer_id = ?
+            AND sessions.deleted = 0
+            ORDER BY sessions.date ASC, sessions.start_time ASC
+        `;
+        return this.query(sql, [trainerId])
+            .then(result => result.map(row => this.tableToModel(row)));
+    }
+
 }

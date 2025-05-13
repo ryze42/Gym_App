@@ -15,7 +15,6 @@ function LoginView() {
   const navigate = useNavigate();
   const { login, status, user, setStatus} = useAuthenticate()
 
-
   useEffect(() => {
     if (!isRegister && user && status === "loaded") {
       navigate("/");

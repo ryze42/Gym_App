@@ -42,9 +42,23 @@ export class APIBookingController {
   static async getMyBookings(req, res) {
     try {
       const userId = req.authenticatedUser.id;
-      const bookings = await BookingSessionTrainerActivityLocationModel.getAll(userId);
+      const role = req.authenticatedUser.role;
+
+      let bookings;
+
+      if (role === "member") {
+        bookings = await BookingSessionTrainerActivityLocationModel.getAllForMember(userId);
+      } else if (role === "trainer") {
+        bookings = await BookingSessionTrainerActivityLocationModel.getAllByTrainer(userId);
+      } else if (role === "admin") {
+        bookings = await BookingSessionTrainerActivityLocationModel.getAll();
+      } else {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
       res.status(200).json(bookings);
     } catch (err) {
+      console.error("Error fetching bookings:", err);
       res.status(500).json({ message: "Failed to fetch user bookings" });
     }
   }
