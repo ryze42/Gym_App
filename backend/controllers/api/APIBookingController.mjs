@@ -8,42 +8,11 @@ export class APIBookingController {
 
   static {
     this.routes.use(APIAuthenticationController.middleware);
-    this.routes.get("/", APIAuthenticationController.restrict(["admin"]), this.getAllBookings);
     this.routes.get("/my", APIAuthenticationController.restrict(["member", "trainer", "admin"]),this.getMyBookings);
     this.routes.get("/:id", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.getBookingById);
     this.routes.post("/", APIAuthenticationController.restrict(["member", "trainer", "admin"]), this.createBooking);
     this.routes.put("/:id", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.updateBooking);
     this.routes.delete("/:id",APIAuthenticationController.restrict(["admin", "member", "trainer"]),this.deleteBooking);
-  }
-
-  /**
-   * @type {express.RequestHandler}
-   * @openapi
-   * /api/bookings:
-   *   get:
-   *     summary: "Get all bookings (admin only)"
-   *     tags: [Bookings]
-   *     security:
-   *       - ApiKey: []
-   *     responses:
-   *       '200':
-   *         description: "List of all bookings"
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: array
-   *               items:
-   *                 $ref: "#/components/schemas/Booking"
-   *       default:
-   *         $ref: "#/components/responses/Error"
-   */
-  static async getAllBookings(req, res) {
-    try {
-      const bookings = await BookingModel.getAll();
-      res.status(200).json(bookings);
-    } catch (err) {
-      res.status(500).json({ message: "Failed to fetch bookings" });
-    }
   }
 
   /**
