@@ -146,39 +146,39 @@ function BookingView() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-80 relative">
+        <div className="fixed inset-0 backdrop-blur-md flex justify-center items-center z-50">
+            <div className="bg-white p-6 rounded shadow-lg w-80 relative">
             <button
-              className="absolute top-2 right-3 text-gray-600 text-xl"
-              onClick={() => setModalOpen(false)}
+                className="absolute top-2 right-3 text-gray-600 text-xl"
+                onClick={() => setModalOpen(false)}
             >
-              &times;
+                &times;
             </button>
             <h2 className="text-lg font-semibold mb-4">Export XML</h2>
             <div className="flex flex-col gap-3">
-              {user.role === "trainer" ? (
+                {user.role === "trainer" ? (
                 <button
-                  onClick={() =>
+                    onClick={() =>
                     navigate(`/booking/xml/trainer?trainerId=${user.id}`)
-                  }
-                  className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+                    }
+                    className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
                 >
-                  Export My Sessions
+                    Export My Sessions
                 </button>
-              ) : (
+                ) : (
                 <button
-                  onClick={() =>
+                    onClick={() =>
                     navigate(`/booking/xml/member?memberId=${user.id}`)
-                  }
-                  className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                    }
+                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
                 >
-                  Export My Bookings
+                    Export My Bookings
                 </button>
-              )}
+                )}
             </div>
-          </div>
+            </div>
         </div>
-      )}
+        )}
     </section>
   );
 }
