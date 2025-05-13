@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuthenticate } from "./useAuthenticate";
 import { fetchAPI } from "../api.mjs";
@@ -13,7 +13,14 @@ function LoginView() {
   const [registerPassword, setRegisterPassword] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { login, status, user } = useAuthenticate()
+  const { login, status, user, setStatus} = useAuthenticate()
+
+
+  useEffect(() => {
+    if (!isRegister && user && status === "loaded") {
+      navigate("/");
+    }
+  }, [user, status, isRegister, navigate]);
 
   const toggleForms = (e) => {
     e.preventDefault();
@@ -24,13 +31,11 @@ function LoginView() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(null);
+
     try {
-      const res = await fetchAPI("POST", "/authenticate", { email: loginEmail, password: loginPassword }, null);
-      if (res.status === 200) {
-        localStorage.setItem("authKey", res.body.key);
-        navigate("/");
-      } else {
-        setError(res.body.message || "Login failed");
+      const response = await login(loginEmail, loginPassword);
+      if (response.status !== 200) {
+        setError(response.body?.message || "Login failed");
       }
     } catch (err) {
       setError(err.toString());

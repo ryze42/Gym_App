@@ -21,7 +21,7 @@ export function AuthenticationProvider({ children }) {
                     setStatus(null)
                 })
         } else {
-            setStatus(null)// change to updated github version ( should be "logged out" )
+            setStatus(null)
         }
     }, [setUser, setStatus])
 
@@ -47,9 +47,9 @@ export function useAuthenticate(restrictToRoles = null) {
         }
     }, [setUser, setStatus])
 
-    const login = useCallback((username, password) => {
+    const login = useCallback((email, password) => {
         const body = {
-            username,
+            email,
             password
         }
 
@@ -77,8 +77,9 @@ export function useAuthenticate(restrictToRoles = null) {
             .then(response => {
                 setUser(null)
                 localStorage.removeItem("authKey")
+                setStatus(null)
             })
-    }, [setUser, user])
+    }, [setUser, user, setStatus])
 
     const refresh = useCallback(() => {
         getUser(user.authenticationKey)

@@ -17,7 +17,6 @@ function Layout() {
                 onClick={() => navigate("/")}
                 className="btn btn-ghost text-lg">
                 High Street Gym
-                {/* <img src="../img/hsg_logo_322x105.png" alt="High Street Gym Logo" className="h-8" /> */}
             </button>
             {user
                     ? <button
@@ -66,31 +65,3 @@ function Layout() {
 }
 
 export default Layout
-
-/* <Link to={"/staff/login"}>goto login</Link> */
-// function Layout() {
-//     const navigate = useNavigate()
-
-//     return <main className="max-w-[430px] min-h-screen mx-auto shadow">
-//         <header className="navbar justify-between bg-base-100 shadow-md">
-//             <button
-//                 onClick={() => navigate("/")}
-//                 className="btn btn-ghost text-lg">
-//                 Minute Coffee
-//             </button>
-//             <button
-//                 onClick={() => navigate("/staff/login")}
-//                 className="btn btn-ghost text-lg">
-//                 <FaLock />
-//             </button>
-//         </header>
-//         <Outlet />
-//     </main>
-// }
-
-
-// FOR ROLE BASED ACCESS 
-/* <button disabled>
-<FaClipboardList className="text-2xl" />
-<span className="dock-label">Orders</span>
-</button> */

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchAPI } from '../api.mjs';
+import { useNavigate } from 'react-router';
 import { useAuthenticate } from '../authentication/useAuthenticate';
 
 function BlogPosts({ initialPosts = [], currentUser }) {
@@ -9,7 +10,16 @@ function BlogPosts({ initialPosts = [], currentUser }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const authKey = localStorage.getItem("authKey");
+  const { user } = useAuthenticate();
+  const navigate = useNavigate();
 
+
+  useEffect(() => {
+    if (!authKey) {
+        navigate("/authenticate");
+    }
+  }, [authKey, navigate]); 
+  
   useEffect(() => {
     setIsLoading(true);
     fetchAPI("GET", "/blog_posts", null, authKey)

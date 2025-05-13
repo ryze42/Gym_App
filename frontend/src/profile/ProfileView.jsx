@@ -7,6 +7,7 @@ import { useAuthenticate } from "../authentication/useAuthenticate";
 function ProfileView() {
   const navigate = useNavigate();
   const authKey = localStorage.getItem("authKey");
+  const { user } = useAuthenticate();
 
   const [id, setId] = useState(null);
   const [firstName, setFirstName] = useState("");

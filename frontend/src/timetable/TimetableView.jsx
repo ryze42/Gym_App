@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router";
+import { useAuthenticate } from "../authentication/useAuthenticate";
 import { fetchAPI } from "../api.mjs";
 
 function TimetableView() {
@@ -7,6 +8,7 @@ function TimetableView() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const selectedSessionId = searchParams.get("sessionId");
+  const { user } = useAuthenticate();
 
   const authKey = localStorage.getItem("authKey");
 
