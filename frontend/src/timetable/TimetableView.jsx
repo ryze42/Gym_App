@@ -106,6 +106,38 @@ function TimetableView() {
     </section>
   );
 
+  const handleBooking = (e) => {
+    e.preventDefault();
+    const sessionId = parseInt(e.target.session_id.value, 10);
+
+    const memberId = user?.id;
+
+    if (!memberId) {
+      alert("You must be logged in to book a session.");
+      return;
+    }
+
+    const bookingData = {
+      session_id: sessionId,
+      member_id: memberId,
+      status: "active",
+    };
+
+    fetchAPI("POST", "/bookings", bookingData, authKey)
+      .then(response => {
+        if (response.status >= 200 && response.status < 300) {
+          alert("Booking successful!");
+          setShowModal(false);
+          setSelectedSlot(null);
+        } else {
+          alert("Booking failed: " + (response.body?.message || "Unknown error"));
+        }
+      })
+      .catch(err => {
+        alert("Error: " + (err.message || "Unknown error"));
+      });
+  };
+
   return (
     <section className="flex flex-col items-center p-4 w-full max-w-4xl">
       <h1 className="text-2xl font-bold mb-6">Session Timetable</h1>
@@ -202,13 +234,12 @@ function TimetableView() {
               <span className="text-2xl font-semibold">✕</span>
             </button>
 
-
             <h2 className="text-xl font-bold mb-4">Book a Session</h2>
             <p className="mb-2"><strong>Activity:</strong> {selectedSlot.activity.name}</p>
             <p className="mb-2"><strong>Time & Date:</strong> {selectedSlot.session.start_time} on {new Date(selectedSlot.session.date).toDateString()}</p>
             <p className="mb-4"><strong>📍 Location:</strong> {selectedSlot.location.name}</p>
 
-            <form action="/booking/confirm_session_booking" method="POST">
+            <form onSubmit={handleBooking}>
               <label htmlFor="sessionSelect" className="block mb-1 font-medium">Select Trainer:</label>
 
               <select

@@ -7,8 +7,11 @@ import { fetchAPI } from "../api.mjs";
 function BookingView() {
   const [isModalOpen, setModalOpen] = useState(false);
   const [bookings, setBookings] = useState([]);
+  const [filteredBookings, setFilteredBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hidePast, setHidePast] = useState(true);
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -62,6 +65,26 @@ function BookingView() {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    if (user?.role === "trainer") {
+      setFilteredBookings(bookings); // No filter UI for trainer sessions yet
+      return;
+    }
+
+    let filtered = bookings;
+
+    if (hidePast) {
+      const now = new Date();
+      filtered = filtered.filter((item) => new Date(item.session.date) >= now);
+    }
+
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((item) => item.booking.status === statusFilter);
+    }
+
+    setFilteredBookings(filtered);
+  }, [bookings, hidePast, statusFilter, user]);
+
   const cancelBooking = async (bookingId) => {
     try {
       const res = await fetchAPI("DELETE", `/bookings/${bookingId}`, null, authKey);
@@ -75,7 +98,7 @@ function BookingView() {
 
   if (!user) return null;
   if (loading) return <p className="text-center mt-8">Loading...</p>;
-  if (error)   return <p className="text-center mt-8 text-red-600">{error}</p>;
+  if (error) return <p className="text-center mt-8 text-red-600">{error}</p>;
 
   return (
     <section className="flex flex-col items-center relative p-4">
@@ -91,13 +114,41 @@ function BookingView() {
         Export
       </button>
 
+      {/* Filters (for members only) */}
+      {user.role !== "trainer" && (
+        <div className="filter-container mb-4 flex items-center gap-4">
+          <label htmlFor="booking-filter" className="text-sm font-medium">
+            Filter by status:
+          </label>
+          <select
+            id="booking-filter"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="border px-2 py-1 rounded"
+          >
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+
+          <label className="flex items-center gap-2 text-sm ml-4">
+            <input
+              type="checkbox"
+              checked={hidePast}
+              onChange={(e) => setHidePast(e.target.checked)}
+            />
+            Hide Past Bookings
+          </label>
+        </div>
+      )}
+
       <div className="w-full max-w-3xl">
-        {bookings.length === 0 ? (
+        {filteredBookings.length === 0 ? (
           <p className="text-center mt-8">
             No {user.role === "trainer" ? "sessions" : "bookings"} found.
           </p>
         ) : (
-          bookings.map((item) => {
+          filteredBookings.map((item) => {
             if (user.role === "trainer") {
               return (
                 <div key={item.id} className="border p-4 rounded mb-4">
@@ -147,38 +198,40 @@ function BookingView() {
 
       {isModalOpen && (
         <div className="fixed inset-0 backdrop-blur-md flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded shadow-lg w-80 relative">
+          <div className="bg-white p-6 rounded shadow-lg w-80 relative">
             <button
-                className="absolute top-2 right-3 text-gray-600 text-xl"
-                onClick={() => setModalOpen(false)}
+              className="absolute top-2 right-3 text-gray-600 text-xl"
+              onClick={() => setModalOpen(false)}
             >
-                &times;
+              &times;
             </button>
-            <h2 className="text-lg font-semibold mb-4 text-black">Click to Export XML file</h2>
+            <h2 className="text-lg font-semibold mb-4 text-black">
+              Click to Export XML file
+            </h2>
             <div className="flex flex-col gap-3">
-                {user.role === "trainer" ? (
+              {user.role === "trainer" ? (
                 <button
-                    onClick={() =>
+                  onClick={() =>
                     navigate(`/booking/xml/trainer?trainerId=${user.id}`)
-                    }
-                    className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+                  }
+                  className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
                 >
-                    Export My Sessions
+                  Export My Sessions
                 </button>
-                ) : (
+              ) : (
                 <button
-                    onClick={() =>
+                  onClick={() =>
                     navigate(`/booking/xml/member?memberId=${user.id}`)
-                    }
-                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                  }
+                  className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
                 >
-                    Export My Bookings
+                  Export My Bookings
                 </button>
-                )}
+              )}
             </div>
-            </div>
+          </div>
         </div>
-        )}
+      )}
     </section>
   );
 }
