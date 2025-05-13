@@ -94,7 +94,18 @@ function TimetableView() {
   if (!days.length) return (
     <section className="flex flex-col items-center p-4">
       <h1 className="text-2xl font-semibold mb-4">Session Timetable</h1>
-      <span className="text-gray-500">No sessions match your filter criteria.</span>
+      <div className="flex flex-col items-center gap-4">
+        <span className="text-gray-500">No sessions match your filter criteria.</span>
+        <button 
+          className="btn btn-outline btn-primary"
+          onClick={() => {
+            setLocFilter("all");
+            setActFilter("all");
+          }}
+        >
+          Reset Filters
+        </button>
+      </div>
     </section>
   );
 
@@ -122,6 +133,17 @@ function TimetableView() {
             <option key={act.id} value={act.id}>{act.name}</option>
           ))}
         </select>
+        {(locFilter !== "all" || actFilter !== "all") && (
+          <button 
+            className="btn btn-outline btn-error"
+            onClick={() => {
+              setLocFilter("all");
+              setActFilter("all");
+            }}
+          >
+            Reset
+          </button>
+        )}
       </div>
       {days.map(day => (
         <div key={day} className="w-full mb-8">
@@ -151,7 +173,7 @@ function TimetableView() {
                         getTimetable();
                       }}
                     >
-                      View
+                      Book
                     </button>
                   </li>
                 ))}
