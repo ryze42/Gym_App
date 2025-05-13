@@ -151,7 +151,7 @@ export class APIBlogPostController {
    * @openapi
    * /api/blog_posts/{id}:
    *   put:
-   *     summary: "Update an existing blog post"
+   *     summary: "Update an existing blog post by ID"
    *     tags: [BlogPosts]
    *     security:
    *       - ApiKey: []

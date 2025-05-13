@@ -10,7 +10,8 @@ export class DatabaseModel {
             password: "password123",
             database: "high_street_gym",
             nestTables: true,
-            multipleStatements: true
+            multipleStatements: true,
+            timezone: "-10:00"// compensate to take ten hours off to match local time, fix later, find source of why its changing from the db to the initial fetch 
         })
     }
 

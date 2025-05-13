@@ -183,7 +183,7 @@ function TimetableView() {
       </div>
       {days.map(day => (
         <div key={day} className="w-full mb-8">
-          <h2 className="text-xl font-medium mb-4">{ new Date(day).toDateString() }</h2>
+          <h2 className="text-xl font-medium mb-4">{ new Date(day).toLocaleDateString() }</h2>
           {Object.entries(filteredSessions[day]).map(([actName, slots]) => (
             <div key={actName} className="mb-6">
               <h3 className="text-lg font-semibold mb-2">{actName}</h3>
@@ -239,7 +239,7 @@ function TimetableView() {
 
             <h2 className="text-xl font-bold mb-4">Book a Session</h2>
             <p className="mb-2"><strong>Activity:</strong> {selectedSlot.activity.name}</p>
-            <p className="mb-2"><strong>Time & Date:</strong> {selectedSlot.session.start_time} on {new Date(selectedSlot.session.date).toDateString()}</p>
+            <p className="mb-2"><strong>Time & Date:</strong> {selectedSlot.session.start_time} on {new Date(selectedSlot.session.date).toLocaleDateString()}</p>
             <p className="mb-4"><strong>📍 Location:</strong> {selectedSlot.location.name}</p>
 
             <form onSubmit={handleBooking}>
