@@ -255,10 +255,8 @@ export class APIBookingController {
   try {
     const memberId = req.authenticatedUser?.id;
     const exportDate = DatabaseModel.toMySqlDate(new Date());
-    console.log("Exporting bookings for memberId:", memberId);
 
     const bookings = await BookingSessionTrainerActivityLocationModel.getAll(memberId);
-    console.log("Fetched bookings:", bookings.length);
 
     res.status(200).contentType("text/xml").render("xml/bookings.xml.ejs", {
       bookingDetails: bookings,

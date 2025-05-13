@@ -211,7 +211,7 @@ function BookingView() {
             <div className="flex flex-col gap-3">
               {user.role === "trainer" ? (
                 <XMLDownloadButton
-                    route={`/api/bookings/trainer/xml`} // corrected route
+                    route={`/api/bookings/trainer/xml`} 
                     filename={`trainer_sessions_${user.id}.xml`}
                     authenticationKey={authKey}
                     className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
@@ -220,7 +220,7 @@ function BookingView() {
                 </XMLDownloadButton>
                 ) : (
                 <XMLDownloadButton
-                    route={`/api/bookings/member/xml`} // corrected route
+                    route={`/api/bookings/member/xml`} 
                     filename={`member_bookings_${user.id}.xml`}
                     authenticationKey={authKey}
                     className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
