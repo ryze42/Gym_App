@@ -145,7 +145,7 @@ function ProfileView() {
           />
 
           <button type="submit" className="btn btn-primary w-full">
-            Update Profile
+            Update Details
           </button>
         </form>
       </div>

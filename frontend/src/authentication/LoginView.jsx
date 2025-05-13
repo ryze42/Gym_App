@@ -3,7 +3,6 @@ import { useNavigate } from "react-router";
 import { useAuthenticate } from "./useAuthenticate";
 import { fetchAPI } from "../api.mjs";
 
-// CHNAGE AUTH KEY TO STORE IN DB as well?
 function LoginView() {
   const [isRegister, setIsRegister] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");

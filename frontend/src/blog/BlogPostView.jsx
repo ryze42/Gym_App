@@ -8,35 +8,35 @@ function BlogPosts({ initialPosts = [], currentUser }) {
   const [content, setContent] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const authKey = localStorage.getItem("authKey");
 
-  // Fetch posts on component mount
   useEffect(() => {
     setIsLoading(true);
-    fetchAPI("GET", "/api/blog_posts")
+    fetchAPI("GET", "/blog_posts", null, authKey)
       .then(res => {
-        console.log("API Response:", res); // Debug: log the API response
-        if (Array.isArray(res)) {
-          setBlogPosts(res);
-        } else if (res && Array.isArray(res.body)) {
-          setBlogPosts(res.body);
-        } else {
-          console.error("Unexpected API response format:", res);
-          setError("Unexpected data format received");
+        if (res.status && res.status !== 200) {
+          throw new Error(res.message || `Error ${res.status}`);
         }
-        setIsLoading(false);
+        // now res is your real posts array
+        const posts = Array.isArray(res) ? res : res.body;
+        if (!Array.isArray(posts)) {
+          throw new Error("Unexpected data format");
+        }
+        setBlogPosts(posts);
       })
       .catch(err => {
-        console.error("Failed to load posts", err);
-        setError("Failed to load blog posts");
-        setIsLoading(false);
-      });
+        console.error(err);
+        setError(err.message);
+      })
+      .finally(() => setIsLoading(false));
   }, []);
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newPost = { subject, content };
     try {
-      const response = await fetchAPI('POST', '/api/blog_posts', newPost);
+      const response = await fetchAPI('POST', '/blog_posts', newPost);
       console.log("Create response:", response);
       
       if (response && response.id) {
@@ -66,7 +66,7 @@ function BlogPosts({ initialPosts = [], currentUser }) {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this blog post?')) return;
     try {
-      const response = await fetchAPI('DELETE', `/api/blog_posts/${id}`);
+      const response = await fetchAPI('DELETE', `/blog_posts/${id}`);
       console.log("Delete response:", response);
       
       if (response) {
