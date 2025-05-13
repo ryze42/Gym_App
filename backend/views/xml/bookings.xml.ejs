@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE bookings [
+    <!ELEMENT bookings (booking*)>
+    <!ATTLIST bookings export-date CDATA "0000-00-00">
+    
+    <!ELEMENT booking (id, member-id, session-id, status, session, trainer, activity, location)>
+    <!ELEMENT id (#PCDATA)>
+    <!ELEMENT member-id (#PCDATA)>
+    <!ELEMENT session-id (#PCDATA)>
+    <!ELEMENT status (#PCDATA)>
+    
+    <!ELEMENT session (id, name, date)>
+    <!ELEMENT id (#PCDATA)>
+    <!ELEMENT name (#PCDATA)>
+    <!ELEMENT date (#PCDATA)>
+    
+    <!ELEMENT trainer (id, name)>
+    <!ELEMENT id (#PCDATA)>
+    <!ELEMENT name (#PCDATA)>
+    
+    <!ELEMENT activity (id, name)>
+    <!ELEMENT id (#PCDATA)>
+    <!ELEMENT name (#PCDATA)>
+    
+    <!ELEMENT location (id, name, address)>
+    <!ELEMENT id (#PCDATA)>
+    <!ELEMENT name (#PCDATA)>
+    <!ELEMENT address (#PCDATA)>
+]>
+<bookings>
+    <% for (const {booking, session, trainer, activity, location} of bookingDetails) { %>
+    <booking>
+        <id><%= booking.id %></id>
+        <member-id><%= booking.member_id %></member-id>
+        <session-id><%= booking.session_id %></session-id>
+        <status><%= booking.status %></status>
+        
+        <session>
+            <id><%= session.id %></id>
+            <name><%= session.name %></name>
+            <date><%= session.date %></date>
+        </session>
+        
+        <trainer>
+            <id><%= trainer.id %></id>
+            <name><%= trainer.name %></name>
+        </trainer>
+        
+        <activity>
+            <id><%= activity.id %></id>
+            <name><%= activity.name %></name>
+        </activity>
+        
+        <location>
+            <id><%= location.id %></id>
+            <name><%= location.name %></name>
+            <address><%= location.address %></address>
+        </location>
+    </booking>
+    <% } %>
+</bookings>

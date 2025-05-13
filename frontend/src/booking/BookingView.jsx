@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router";
 import { useAuthenticate } from "../authentication/useAuthenticate";
 import { CiExport } from "react-icons/ci";
 import { fetchAPI } from "../api.mjs";
+import XMLDownloadButton from "../common/XMLDownloadButton"; 
 
 function BookingView() {
   const [isModalOpen, setModalOpen] = useState(false);
@@ -67,7 +68,7 @@ function BookingView() {
 
   useEffect(() => {
     if (user?.role === "trainer") {
-      setFilteredBookings(bookings); // No filter UI for trainer sessions yet
+      setFilteredBookings(bookings); 
       return;
     }
 
@@ -114,7 +115,6 @@ function BookingView() {
         Export
       </button>
 
-      {/* Filters (for members only) */}
       {user.role !== "trainer" && (
         <div className="filter-container mb-4 flex items-center gap-4">
           <label htmlFor="booking-filter" className="text-sm font-medium">
@@ -151,7 +151,7 @@ function BookingView() {
           filteredBookings.map((item) => {
             if (user.role === "trainer") {
               return (
-                <div key={item.id} className="border p-4 rounded mb-4">
+                <div key={item.id} className="border p-4 rounded mb-4 bg-white text-black">
                   <h2 className="text-lg font-medium">{item.activityName}</h2>
                   <p>Date: {new Date(item.date).toLocaleDateString()}</p>
                   <p>Time: {item.start_time}</p>
@@ -210,24 +210,24 @@ function BookingView() {
             </h2>
             <div className="flex flex-col gap-3">
               {user.role === "trainer" ? (
-                <button
-                  onClick={() =>
-                    navigate(`/booking/xml/trainer?trainerId=${user.id}`)
-                  }
-                  className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+                <XMLDownloadButton
+                    route={`/api/bookings/trainer/xml`} // corrected route
+                    filename={`trainer_sessions_${user.id}.xml`}
+                    authenticationKey={authKey}
+                    className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
                 >
-                  Export My Sessions
-                </button>
-              ) : (
-                <button
-                  onClick={() =>
-                    navigate(`/booking/xml/member?memberId=${user.id}`)
-                  }
-                  className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                    Export My Sessions
+                </XMLDownloadButton>
+                ) : (
+                <XMLDownloadButton
+                    route={`/api/bookings/member/xml`} // corrected route
+                    filename={`member_bookings_${user.id}.xml`}
+                    authenticationKey={authKey}
+                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
                 >
-                  Export My Bookings
-                </button>
-              )}
+                    Export My Bookings
+                </XMLDownloadButton>
+                )}
             </div>
           </div>
         </div>

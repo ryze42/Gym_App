@@ -22,6 +22,12 @@ function TimetableView() {
   const [showModal, setShowModal] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
 
+//   const parseLocalDate = isoDate => {
+//   const [year, month, day] = isoDate.split("-");
+//   const localDate = new Date(year, month - 1, day);  // Set as local midnight
+//   return localDate;
+// };
+
   const getTimetable = useCallback(() => {
     if (!authKey) return;
     setLoading(true);
@@ -73,9 +79,9 @@ function TimetableView() {
     const filteredActivities = {};
 
     Object.entries(dayActivities).forEach(([actName, slots]) => {
-      const filteredSlots = slots.filter(slot =>
-        actFilter === "all" || slot.activity.id.toString() === actFilter
-      );
+      const filteredSlots = slots
+        .filter(slot => actFilter === "all" || slot.activity.id.toString() === actFilter)
+        .sort((a, b) => new Date(`${a.session.date}T${a.session.start_time}`) - new Date(`${b.session.date}T${b.session.start_time}`));
 
       if (filteredSlots.length > 0) {
         filteredActivities[actName] = filteredSlots;
@@ -87,7 +93,8 @@ function TimetableView() {
     }
   });
 
-  const days = Object.keys(filteredSessions);
+  const days = Object.keys(filteredSessions).sort((a, b) => new Date(a) - new Date(b));
+
   if (!days.length) return (
     <section className="flex flex-col items-center p-4">
       <h1 className="text-2xl font-semibold mb-4">Session Timetable</h1>
@@ -176,7 +183,7 @@ function TimetableView() {
       </div>
       {days.map(day => (
         <div key={day} className="w-full mb-8">
-          <h2 className="text-xl font-medium mb-4">{day}</h2>
+          <h2 className="text-xl font-medium mb-4">{ new Date(day).toDateString() }</h2>
           {Object.entries(filteredSessions[day]).map(([actName, slots]) => (
             <div key={actName} className="mb-6">
               <h3 className="text-lg font-semibold mb-2">{actName}</h3>
@@ -196,8 +203,6 @@ function TimetableView() {
                     <button
                       className="btn btn-primary"
                       onClick={() => {
-                        console.log("Opening modal with slot:", slot);
-
                         const sameSlotSessions = slot.sessionIds?.map((id, index) => {
                           const trainer = slot.trainers[index];
                           return {
@@ -205,8 +210,6 @@ function TimetableView() {
                             trainerName: `${trainer.first_name} ${trainer.last_name}`
                           };
                         }) || [];
-
-                        console.log("Computed sameSlotSessions:", sameSlotSessions);
 
                         setSelectedSlot({ ...slot, sameSlotSessions });
                         setShowModal(true);

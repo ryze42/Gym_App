@@ -1,4 +1,5 @@
 import express from "express";
+import { DatabaseModel } from "../../models/DatabaseModel.mjs";
 import { BookingModel } from "../../models/BookingModel.mjs";
 import { BookingSessionTrainerActivityLocationModel } from "../../models/BookingSessionTrainerActivityLocationModel.mjs";
 import { APIAuthenticationController } from "../api/APIAuthenticationController.mjs";
@@ -13,6 +14,8 @@ export class APIBookingController {
     this.routes.post("/", APIAuthenticationController.restrict(["member", "trainer", "admin"]), this.createBooking);
     this.routes.put("/:id", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.updateBooking);
     this.routes.delete("/:id",APIAuthenticationController.restrict(["admin", "member", "trainer"]),this.deleteBooking);
+    this.routes.get("/member/xml",APIAuthenticationController.restrict(["member"]),this.getBookingsXML);
+    this.routes.get("/trainer/xml",APIAuthenticationController.restrict(["trainer"]),this.getSessionsXML);
   }
 
   /**
@@ -210,68 +213,116 @@ export class APIBookingController {
 
 
   /**
-     * Handle exporting all complete orders to XML
-     * 
-     * @type {express.RequestHandler}
-     * @openapi
-     * /api/bookings/xml:
-     *      get:
-     *          summary: "Export all complete orders to XML"
-     *          tags: [Orders]
-     *          security:
-     *              - ApiKey: [] 
-     *          responses:
-     *              '200':
-     *                  description: 'Complete orders XML'
-     *                  content:
-     *                      text/xml:
-     *                          schema:
-     *                              type: array
-     *                              xml:
-     *                                  name: orders
-     *                              items:
-     *                                  type: object
-     *                                  properties:
-     *                                      id:
-     *                                          type: string
-     *                                          example: 1
-     *                                      date:
-     *                                          type: string
-     *                                          format: date
-     *                                      customer:
-     *                                          type: object
-     *                                          properties:
-     *                                              name:
-     *                                                  type: string
-     *                                                  example: John Doe
-     *                                              phone:
-     *                                                  type: string
-     *                                                  example: 0000 000 000
-     *                                              email:
-     *                                                  type: string
-     *                                                  example: john@doe.mail
-     *                                      product:
-     *                                          type: object
-     *                                          properties:
-     *                                              name:
-     *                                                  type: string
-     *                                                  example: Latte
-     *                                              price:
-     *                                                  type: number
-     *                                                  example: 2.50
-     *              default:
-     *                  $ref: "#/components/responses/Error"
-     */
-  //   static async getOrdersXML(req, res) {
-  //     try {
-  //         const orderProducts = await OrderProductModel.getAllByStatus("complete")
-          
-  //         res.status(200).contentType(text/css).render("xml/orders.xml.ejs", {orderProducts})
-  //     } catch (error) {
-  //         res.status(500).json({
-  //             message: "failed to export xml for orders",
-  //             errors: [error]
-  //         })
-  //     }
-  // }
+   * Export all bookings of the authenticated member to XML
+   * @type {express.RequestHandler}
+   * @openapi
+   * /api/bookings/member/xml:
+   *   get:
+   *     summary: "Export member's bookings to XML"
+   *     tags: [Bookings]
+   *     security:
+   *       - ApiKey: []
+   *     responses:
+   *       '200':
+   *         description: "XML of member's bookings"
+   *         content:
+   *           text/xml:
+   *             schema:
+   *               type: array
+   *               xml:
+   *                 name: bookings
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   id:
+   *                     type: string
+   *                   date:
+   *                     type: string
+   *                     format: date
+   *                   status:
+   *                     type: string
+   *                   session:
+   *                     type: object
+   *                     properties:
+   *                       name:
+   *                         type: string
+   *                       location:
+   *                         type: string
+   *       default:
+   *         $ref: "#/components/responses/Error"
+   */
+  static async getBookingsXML(req, res) {
+  try {
+    const memberId = req.authenticatedUser?.id;
+    const exportDate = DatabaseModel.toMySqlDate(new Date());
+    console.log("Exporting bookings for memberId:", memberId);
+
+    const bookings = await BookingSessionTrainerActivityLocationModel.getAll(memberId);
+    console.log("Fetched bookings:", bookings.length);
+
+    res.status(200).contentType("text/xml").render("xml/bookings.xml.ejs", {
+      bookingDetails: bookings,
+      exportDate
+    });
+  } catch (error) {
+    console.error("Error exporting XML:", error);
+    res.status(500).json({
+      message: "Failed to export XML for bookings",
+      errors: [error.message || error]
+    });
+  }
+}
+
+
+  /**
+   * Export all sessions of the authenticated trainer to XML
+   * @type {express.RequestHandler}
+   * @openapi
+   * /api/bookings/trainer/xml:
+   *   get:
+   *     summary: "Export trainer's sessions to XML"
+   *     tags: [Bookings]
+   *     security:
+   *       - ApiKey: []
+   *     responses:
+   *       '200':
+   *         description: "XML of trainer's sessions"
+   *         content:
+   *           text/xml:
+   *             schema:
+   *               type: array
+   *               xml:
+   *                 name: sessions
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   id:
+   *                     type: string
+   *                   date:
+   *                     type: string
+   *                     format: date
+   *                   activity:
+   *                     type: string
+   *                   location:
+   *                     type: string
+   *       default:
+   *         $ref: "#/components/responses/Error"
+   */
+  static async getSessionsXML(req, res) {
+    try {
+      const trainerId = req.authenticatedUser.id;
+      const exportDate = DatabaseModel.toMySqlDate(new Date());
+      const sessions = await BookingSessionTrainerActivityLocationModel.getAllByTrainer(trainerId);
+
+      res.status(200).contentType("text/xml").render("xml/sessions.xml.ejs", {
+        sessions,
+        exportDate
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to export XML for sessions",
+        errors: [error]
+      });
+    }
+  }
 }
