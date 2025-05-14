@@ -8,7 +8,6 @@ import { APIBlogPostController } from "../api/APIBlogPostController.mjs"
 import { APIBookingController } from "../api/APIBookingController.mjs"
 import { APISessionTimetableController } from "../api/APISessionTimetableController.mjs"
 
-
 const options = {
     failOnErrors: true, 
     definition: {

@@ -41,7 +41,7 @@ export class APIUserController {
    */
   static async getAuthenticatedUser(req, res) {
     const user = req.authenticatedUser;
-    const apiKey = req.headers["x-auth-key"];    // <- grab the raw UUID string
+    const apiKey = req.headers["x-auth-key"];    
 
     return res.status(200).json({
       id:                user.id,
@@ -50,7 +50,7 @@ export class APIUserController {
       role:              user.role,
       email:             user.email,
       password:          user.password,
-      authenticationKey: { key: apiKey }         // <- wrap it in { key: … }
+      authenticationKey: { key: apiKey }         
     });
   }
 

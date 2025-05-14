@@ -230,9 +230,6 @@ export class APIBookingController {
     }
   }
 
-
-
-
   /**
    * Export all bookings of the authenticated member to XML
    * @type {express.RequestHandler}
@@ -291,7 +288,6 @@ export class APIBookingController {
       });
     }
   }
-
 
   /**
    * Export all sessions of the authenticated trainer to XML

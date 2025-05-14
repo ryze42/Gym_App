@@ -139,7 +139,6 @@ export class APISessionTimetableController {
 
       return res.status(200).json({
         authenticationKey: { key: apiKey },
-        // log whole object, check response schema to see if it matches
         sessions: groupedSessions,
         activities,
         locations,
@@ -151,7 +150,7 @@ export class APISessionTimetableController {
       return res.status(500).json({ message: "Failed to retrieve timetable" });
     }
   }
-/// add a pattern for time 
+
   /**
    * Groups sessions into slots by date and activity
    */
@@ -198,18 +197,4 @@ export class APISessionTimetableController {
       return grouped;
     }, {});
   }
-
-  // static formatDateString(value) {
-  //   if (!value) return "2025-01-01";
-  //   const date = new Date(value);
-
-  //   return date.toISOString().substring(0, 10); 
-  // }
-
-  // static formatTimeString(value) {
-  //   if (!value) return "00:00";
-  //   const date = new Date(`2025-01-01T${value}`);
-    
-  //   return date.toTimeString().substring(0, 5);
-  // }
 }
