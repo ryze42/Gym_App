@@ -1,5 +1,6 @@
 import express from "express";
 import validator from "validator";
+import bcrypt from "bcryptjs";
 import { UserModel } from "../../models/UserModel.mjs";
 import { APIAuthenticationController } from "../api/APIAuthenticationController.mjs";
 
@@ -73,7 +74,7 @@ export class APIUserController {
    *       '500':
    *         $ref: "#/components/responses/Error"
    */
-  static async updateAuthenticatedUser(req, res) {
+  static async updateAuthenticatedUser(req, res) { // prefill id field, or whatever other fields to work
     const user = req.authenticatedUser;
     const { first_name, last_name, email, password } = req.body;
 
@@ -104,7 +105,7 @@ export class APIUserController {
       if (!validator.isLength(password, { min: 8 })) {
         return res.status(400).json({ message: "Password must be at least 8 characters" });
       }
-      // user.password = await UserModel.hashPassword(password);
+      user.password = await bcrypt.hash(password, 10);
     }
 
     try {

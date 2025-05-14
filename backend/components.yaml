@@ -90,7 +90,8 @@ components:
       properties:
         id:
           type: integer
-          readOnly: true
+          description: ID of the user.
+          example: 1
         first_name:
           type: string
           example: "John"
