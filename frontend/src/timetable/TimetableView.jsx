@@ -22,6 +22,8 @@ function TimetableView() {
   const [showModal, setShowModal] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
 
+  const canBook = user?.role === "member";
+
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
@@ -45,17 +47,11 @@ function TimetableView() {
           setError(response.body.message || "Failed to load timetable");
         }
       })
-      .catch(err => {
-        setError(err.message || String(err));
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      .catch(err => setError(err.message || String(err)))
+      .finally(() => setLoading(false));
   }, [authKey, locFilter]);
 
-  useEffect(() => {
-    getTimetable();
-  }, [getTimetable]);
+  useEffect(() => { getTimetable(); }, [getTimetable]);
 
   if (!authKey) return null;
   if (loading) return (
@@ -72,42 +68,30 @@ function TimetableView() {
   const filteredSessions = {};
   Object.entries(sessions || {}).forEach(([day, dayActivities]) => {
     if (!dayActivities || typeof dayActivities !== 'object') return;
-
     const dayDate = new Date(day);
     if (dayDate < startOfToday) return;
 
     const activitiesForDay = {};
     Object.entries(dayActivities).forEach(([activityName, slots]) => {
       const upcomingSlots = (slots || [])
-        .filter(slot => {
-          const dateTime = new Date(`${slot.session.date}T${slot.session.start_time}`);
-          return dateTime >= new Date();
-        })
+        .filter(slot => new Date(`${slot.session.date}T${slot.session.start_time}`) >= new Date())
         .filter(slot => actFilter === "all" || slot.activity.id.toString() === actFilter)
         .sort((a, b) => new Date(`${a.session.date}T${a.session.start_time}`) - new Date(`${b.session.date}T${b.session.start_time}`));
 
-      if (upcomingSlots.length) {
-        activitiesForDay[activityName] = upcomingSlots;
-      }
+      if (upcomingSlots.length) activitiesForDay[activityName] = upcomingSlots;
     });
 
-    if (Object.keys(activitiesForDay).length) {
-      filteredSessions[day] = activitiesForDay;
-    }
+    if (Object.keys(activitiesForDay).length) filteredSessions[day] = activitiesForDay;
   });
 
-  const days = Object.keys(filteredSessions)
-    .sort((a, b) => new Date(a) - new Date(b));
+  const days = Object.keys(filteredSessions).sort((a, b) => new Date(a) - new Date(b));
 
   if (!days.length) return (
     <section className="flex flex-col items-center p-4">
       <h1 className="text-2xl font-semibold mb-4">Session Timetable</h1>
       <div className="flex flex-col items-center gap-4">
         <span className="text-gray-500">No upcoming sessions match your criteria.</span>
-        <button
-          className="btn btn-outline btn-primary"
-          onClick={() => { setLocFilter("all"); setActFilter("all"); }}
-        >
+        <button className="btn btn-outline btn-primary" onClick={() => { setLocFilter("all"); setActFilter("all"); }}>
           Reset Filters
         </button>
       </div>
@@ -118,11 +102,7 @@ function TimetableView() {
     e.preventDefault();
     const sessionId = parseInt(e.target.session_id.value, 10);
     const memberId = user?.id;
-
-    if (!memberId) {
-      alert("You must be logged in to book a session.");
-      return;
-    }
+    if (!memberId) { alert("You must be logged in to book a session."); return; }
 
     const bookingData = { session_id: sessionId, member_id: memberId, status: "active" };
     fetchAPI("POST", "/bookings", bookingData, authKey)
@@ -135,16 +115,12 @@ function TimetableView() {
           alert("Booking failed: " + (response.body?.message || "Unknown error"));
         }
       })
-      .catch(err => {
-        alert("Error: " + (err.message || "Unknown error"));
-      });
+      .catch(err => alert("Error: " + (err.message || "Unknown error")));
   };
 
   return (
     <section className="flex flex-col items-center p-4 w-full max-w-4xl">
       <h1 className="text-2xl font-bold mb-6">Session Timetable</h1>
-
-      {/* Filters */}
       <div className="flex gap-4 mb-6 w-full">
         <select className="select select-bordered flex-1" value={locFilter} onChange={e => setLocFilter(e.target.value)}>
           <option value="all">All Locations</option>
@@ -163,28 +139,36 @@ function TimetableView() {
 
       {days.map(day => (
         <div key={day} className="w-full mb-8">
-          <h2 className="text-xl font-medium mb-4">{ new Date(day).toLocaleDateString() }</h2>
+          <h2 className="text-xl font-medium mb-4">{new Date(day).toLocaleDateString()}</h2>
           {Object.entries(filteredSessions[day]).map(([activityName, slots]) => (
             <div key={activityName} className="mb-6">
               <h3 className="text-lg font-semibold mb-2">{activityName}</h3>
               <ul className="space-y-4">
-                {slots.map(slot => (
-                  <li key={slot.session.id} className="flex justify-between items-center p-4 border rounded-lg shadow-sm transition bg-white">
-                    <div className="space-y-1">
-                      <div className="font-semibold text-lg text-black">{slot.session.start_time}</div>
-                      <div className="text-sm text-gray-600">📍 {slot.location.name}</div>
-                      <div className="text-sm text-gray-600">Trainers: {[...new Set(slot.trainers.map(t => `${t.first_name} ${t.last_name}`))].join(', ')}</div>
-                    </div>
-                    <button className="btn btn-primary" onClick={() => {
-                      const sameSlotSessions = slot.sessionIds?.map((id, i) => 
-                        ({ sessionId: id, trainerName: `${slot.trainers[i].first_name} ${slot.trainers[i].last_name}` })) || [];
-                      setSelectedSlot({ ...slot, sameSlotSessions });
-                      setShowModal(true);
-                    }}>
-                      Book
-                    </button>
-                  </li>
-                ))}
+                {slots.map(slot => {
+                  const isBooked = slot.session.bookings?.some(booking => booking.member_id === user.id);
+                  const showButton = canBook && !isBooked;
+                  return (
+                    <li key={slot.session.id} className="flex justify-between items-center p-4 border rounded-lg shadow-sm transition bg-white">
+                      <div className="space-y-1">
+                        <div className="font-semibold text-lg text-black">{slot.session.start_time}</div>
+                        <div className="text-sm text-gray-600">📍 {slot.location.name}</div>
+                        <div className="text-sm text-gray-600">Trainers: {[...new Set(slot.trainers.map(t => `${t.first_name} ${t.last_name}`))].join(', ')}</div>
+                      </div>
+                      {showButton ? (
+                        <button className="btn btn-primary" onClick={() => {
+                          const sameSlotSessions = slot.sessionIds?.map((id, i) => 
+                            ({ sessionId: id, trainerName: `${slot.trainers[i].first_name} ${slot.trainers[i].last_name}` })) || [];
+                          setSelectedSlot({ ...slot, sameSlotSessions });
+                          setShowModal(true);
+                        }}>
+                          Book
+                        </button>
+                      ) : (
+                        <span className="text-gray-400">{isBooked ? "Already Booked" : "Booking Unavailable"}</span>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
@@ -205,11 +189,11 @@ function TimetableView() {
               <label htmlFor="sessionSelect" className="block mb-1 font-medium">Select Trainer:</label>
               <select id="sessionSelect" name="session_id" className="select select-bordered w-full mb-4 bg-gray-200">
                 {(selectedSlot.sameSlotSessions || []).length > 0 ?
-                  [...new Map(selectedSlot.sameSlotSessions.map(opt => 
-                    [opt.trainerName.trim(), <option key={opt.sessionId} 
-                    value={opt.sessionId}>👤 {opt.trainerName}</option>])).values()]
-                  :
-                  <option value={selectedSlot.session.id}>{selectedSlot.trainers[0]?.first_name} {selectedSlot.trainers[0]?.last_name}</option>
+                  [...new Map(selectedSlot.sameSlotSessions.map(opt => [
+                    opt.trainerName.trim(),
+                    <option key={opt.sessionId} value={opt.sessionId}>👤 {opt.trainerName}</option>
+                  ])).values()]
+                  : <option value={selectedSlot.session.id}>{selectedSlot.trainers[0]?.first_name} {selectedSlot.trainers[0]?.last_name}</option>
                 }
               </select>
               <button type="submit" className="btn btn-primary w-full">Confirm Booking</button>
