@@ -25,7 +25,7 @@
     <!ELEMENT name (#PCDATA)>
 ]>
 <sessions>
-    <% for (const {session, activity, location, trainer} of trainerSessions) { %>
+    <% for (const {session, activity, location, trainer} of sessions) { %>
     <session>
         <id><%= session.id %></id>
         <activity-id><%= session.activity_id %></activity-id>
@@ -47,7 +47,7 @@
         
         <trainer>
             <id><%= trainer.id %></id>
-            <name><%= trainer.name %></name>
+            <name><%= trainer.first_name %> <%= trainer.last_name %></name>
         </trainer>
     </session>
     <% } %>

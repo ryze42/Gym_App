@@ -145,4 +145,25 @@ export class BookingSessionTrainerActivityLocationModel extends DatabaseModel {
             .then(result => result.map(row => this.tableToModel(row)));
     }
 
+    /**
+     * Retrieves a booking by its ID.
+     * This method joins the bookings, sessions, users, activities, and locations tables to gather the details.
+     * @param {number|string} bookingId - The ID of the booking to retrieve.
+     * @returns {Promise<BookingSessionTrainerActivityLocationModel|null>} - A promise that resolves
+     * to a BookingSessionTrainerActivityLocationModel instance if found, or null if not found.
+     */
+    static getByBookingId(bookingId) {
+        const sql = `
+            SELECT bookings.*, sessions.*, users.*, activities.*, locations.*
+            FROM bookings
+            INNER JOIN sessions ON bookings.session_id = sessions.id
+            INNER JOIN users ON sessions.trainer_id = users.id AND users.role = 'trainer'
+            INNER JOIN activities ON sessions.activity_id = activities.id
+            INNER JOIN locations ON sessions.location_id = locations.id
+            WHERE bookings.id = ?
+            LIMIT 1
+        `;
+        return this.query(sql, [bookingId])
+            .then(rows => rows.length > 0 ? this.tableToModel(rows[0]) : null);
+    }
 }

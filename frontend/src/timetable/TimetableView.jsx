@@ -164,7 +164,7 @@ function TimetableView() {
                           Book
                         </button>
                       ) : (
-                        <span className="text-gray-400">{isBooked ? "Already Booked" : "Booking Unavailable"}</span>
+                        <span className="text-gray-400">{isBooked ? "Already Booked" : ""}</span>
                       )}
                     </li>
                   );

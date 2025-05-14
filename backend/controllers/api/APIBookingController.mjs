@@ -213,17 +213,27 @@ export class APIBookingController {
   static async deleteBooking(req, res) {
     const id = parseInt(req.params.id, 10);
     try {
-      const existing = await BookingModel.getById(id);
+      const existing = await BookingSessionTrainerActivityLocationModel.getByBookingId(id);
       if (!existing) return res.status(404).json({ message: "Booking not found" });
-      if (req.authenticatedUser.role === "member" && existing.member_id !== req.authenticatedUser.id) {
+      console.log("Authenticated user:", req.authenticatedUser);
+      console.log("Existing booking:", existing);
+
+      if (
+        req.authenticatedUser.role === "member" &&
+        existing.booking.member_id !== req.authenticatedUser.id
+      ) {
         return res.status(403).json({ message: "Forbidden" });
       }
+
       await BookingModel.cancel(id);
       res.status(200).json({ message: "Booking cancelled" });
     } catch (err) {
+      console.error("Error in deleteBooking:", err);
       res.status(500).json({ message: "Failed to cancel booking" });
     }
   }
+
+
 
 
   /**
@@ -266,24 +276,24 @@ export class APIBookingController {
    *         $ref: "#/components/responses/Error"
    */
   static async getBookingsXML(req, res) {
-  try {
-    const memberId = req.authenticatedUser?.id;
-    const exportDate = DatabaseModel.toMySqlDate(new Date());
+    try {
+      const memberId = req.authenticatedUser?.id;
+      const exportDate = DatabaseModel.toMySqlDate(new Date());
 
-    const bookings = await BookingSessionTrainerActivityLocationModel.getAll(memberId);
+      const bookings = await BookingSessionTrainerActivityLocationModel.getAll(memberId);
 
-    res.status(200).contentType("text/xml").render("xml/bookings.xml.ejs", {
-      bookingDetails: bookings,
-      exportDate
-    });
-  } catch (error) {
-    console.error("Error exporting XML:", error);
-    res.status(500).json({
-      message: "Failed to export XML for bookings",
-      errors: [error.message || error]
-    });
+      res.status(200).contentType("text/xml").render("xml/bookings.xml.ejs", {
+        bookingDetails: bookings,
+        exportDate
+      });
+    } catch (error) {
+      console.error("Error exporting XML:", error);
+      res.status(500).json({
+        message: "Failed to export XML for bookings",
+        errors: [error.message || error]
+      });
+    }
   }
-}
 
 
   /**

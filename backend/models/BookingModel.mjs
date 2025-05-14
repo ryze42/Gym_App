@@ -40,18 +40,20 @@ export class BookingModel extends DatabaseModel {
      * @returns {Promise<Array<BookingModel>>}
      */
     static getAll() {
-        return this.query("SELECT * FROM bookings WHERE deleted = 0")
+        return this.query("SELECT * FROM bookings WHERE status = 'active'")
             .then(result => result.map(row => this.tableToModel(row)));
     }
     
     static getById(id) {
-        return this.query("SELECT * FROM bookings WHERE id = ?", [id])
+        return this.query("SELECT * FROM bookings WHERE id = ? AND status = 'active'", [id])
             .then(result =>
-                result.length > 0
-                    ? this.tableToModel(result[0])
-                    : Promise.reject("booking not found")
+            result.length > 0
+                ? this.tableToModel(result[0])
+                : Promise.reject(new Error("booking not found"))
             );
     }
+
+
 
     /**
      * Updates an existing booking by ID.
