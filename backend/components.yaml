@@ -82,7 +82,6 @@ components:
     User: 
       type: object
       required:
-        - id
         - first_name
         - last_name
         - role
@@ -90,8 +89,8 @@ components:
         - password
       properties:
         id:
-          type: number
-          example: 1
+          type: integer
+          readOnly: true
         first_name:
           type: string
           example: "John"

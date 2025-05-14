@@ -57,9 +57,9 @@ function LoginView() {
         const loginRes = await fetchAPI("POST", "/authenticate", { email: registerEmail, password: registerPassword }, null);
         if (loginRes.status === 200) {
           localStorage.setItem("authKey", loginRes.body.key);
-          navigate("/timetable");
+          navigate("/");
         } else {
-          navigate("/login");
+          navigate("/authenticate");
         }
       } else {
         setError(res.body.message || "Registration failed");

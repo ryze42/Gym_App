@@ -61,7 +61,6 @@ export class APIBlogPostController {
     }
   }
 
-
   /**
    * @type {express.RequestHandler}
    * @openapi
