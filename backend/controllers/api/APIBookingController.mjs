@@ -215,9 +215,6 @@ export class APIBookingController {
     try {
       const existing = await BookingSessionTrainerActivityLocationModel.getByBookingId(id);
       if (!existing) return res.status(404).json({ message: "Booking not found" });
-      console.log("Authenticated user:", req.authenticatedUser);
-      console.log("Existing booking:", existing);
-
       if (
         req.authenticatedUser.role === "member" &&
         existing.booking.member_id !== req.authenticatedUser.id
