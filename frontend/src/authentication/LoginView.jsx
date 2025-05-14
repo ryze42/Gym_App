@@ -13,7 +13,7 @@ function LoginView() {
   const [registerPassword, setRegisterPassword] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { login, status, user, setStatus} = useAuthenticate()
+  const { login, status, user } = useAuthenticate();
 
   useEffect(() => {
     if (!isRegister && user && status === "loaded") {
@@ -24,7 +24,7 @@ function LoginView() {
   const toggleForms = (e) => {
     e.preventDefault();
     setError(null);
-    setIsRegister(prev => !prev);
+    setIsRegister((prev) => !prev);
   };
 
   const handleLogin = async (e) => {
@@ -32,9 +32,13 @@ function LoginView() {
     setError(null);
 
     try {
-      const response = await login(loginEmail, loginPassword);
-      if (response.status !== 200) {
-        setError(response.body?.message || "Login failed");
+      await login(loginEmail, loginPassword);
+      if (status !== "loaded") {
+        const msg =
+          status === "Invalid credentials"
+            ? "Invalid email or password"
+            : status || "Login failed";
+        setError(msg);
       }
     } catch (err) {
       setError(err.toString());
@@ -50,11 +54,21 @@ function LoginView() {
         last_name: lastName,
         role: "member",
         email: registerEmail,
-        password: registerPassword
+        password: registerPassword,
       };
-      const res = await fetchAPI("POST", "/authenticate/register", body, null);
+      const res = await fetchAPI(
+        "POST",
+        "/authenticate/register",
+        body,
+        null
+      );
       if (res.status === 201) {
-        const loginRes = await fetchAPI("POST", "/authenticate", { email: registerEmail, password: registerPassword }, null);
+        const loginRes = await fetchAPI(
+          "POST",
+          "/authenticate",
+          { email: registerEmail, password: registerPassword },
+          null
+        );
         if (loginRes.status === 200) {
           localStorage.setItem("authKey", loginRes.body.key);
           navigate("/");
@@ -77,19 +91,20 @@ function LoginView() {
         </h2>
 
         {error && (
-          <div className="alert alert-error mb-4">
-            {error}
-          </div>
+          <div className="alert alert-error mb-4">{error}</div>
         )}
 
-        <form onSubmit={isRegister ? handleRegister : handleLogin} className="flex flex-col gap-4">
+        <form
+          onSubmit={isRegister ? handleRegister : handleLogin}
+          className="flex flex-col gap-4"
+        >
           {isRegister && (
             <>
               <input
                 type="text"
                 placeholder="First Name"
                 value={firstName}
-                onChange={e => setFirstName(e.target.value)}
+                onChange={(e) => setFirstName(e.target.value)}
                 required
                 className="input input-bordered w-full"
               />
@@ -97,7 +112,7 @@ function LoginView() {
                 type="text"
                 placeholder="Last Name"
                 value={lastName}
-                onChange={e => setLastName(e.target.value)}
+                onChange={(e) => setLastName(e.target.value)}
                 required
                 className="input input-bordered w-full"
               />
@@ -108,7 +123,11 @@ function LoginView() {
             type="email"
             placeholder="Email"
             value={isRegister ? registerEmail : loginEmail}
-            onChange={e => isRegister ? setRegisterEmail(e.target.value) : setLoginEmail(e.target.value)}
+            onChange={(e) =>
+              isRegister
+                ? setRegisterEmail(e.target.value)
+                : setLoginEmail(e.target.value)
+            }
             required
             className="input input-bordered w-full"
           />
@@ -117,7 +136,11 @@ function LoginView() {
             type="password"
             placeholder="Password"
             value={isRegister ? registerPassword : loginPassword}
-            onChange={e => isRegister ? setRegisterPassword(e.target.value) : setLoginPassword(e.target.value)}
+            onChange={(e) =>
+              isRegister
+                ? setRegisterPassword(e.target.value)
+                : setLoginPassword(e.target.value)
+            }
             required
             className="input input-bordered w-full"
           />
@@ -128,7 +151,9 @@ function LoginView() {
         </form>
 
         <p className="text-center mt-4">
-          {isRegister ? "Already have an account?" : "Don't have an account?"}{" "}
+          {isRegister
+            ? "Already have an account?"
+            : "Don't have an account?"}
           <button onClick={toggleForms} className="text-primary underline">
             {isRegister ? "Login" : "Register"}
           </button>
@@ -139,5 +164,3 @@ function LoginView() {
 }
 
 export default LoginView;
-
-
