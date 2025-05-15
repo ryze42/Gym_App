@@ -9,11 +9,11 @@ export class APIBookingController {
 
   static {
     this.routes.use(APIAuthenticationController.middleware);
-    this.routes.get("/my", APIAuthenticationController.restrict(["member", "trainer", "admin"]),this.getMyBookings);
+    this.routes.get("/my", APIAuthenticationController.restrict(["member", "trainer"]),this.getMyBookings);
     this.routes.get("/:id", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.getBookingById);
-    this.routes.post("/", APIAuthenticationController.restrict(["member", "trainer", "admin"]), this.createBooking);
-    this.routes.put("/:id", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.updateBooking);
-    this.routes.delete("/:id",APIAuthenticationController.restrict(["admin", "member", "trainer"]),this.deleteBooking);
+    this.routes.post("/", APIAuthenticationController.restrict(["member", "admin"]), this.createBooking);
+    this.routes.put("/:id", APIAuthenticationController.restrict(["admin"]), this.updateBooking);
+    this.routes.delete("/:id",APIAuthenticationController.restrict(["admin", "member"]),this.deleteBooking);
     this.routes.get("/member/xml",APIAuthenticationController.restrict(["member"]),this.getBookingsXML);
     this.routes.get("/trainer/xml",APIAuthenticationController.restrict(["trainer"]),this.getSessionsXML);
   }
