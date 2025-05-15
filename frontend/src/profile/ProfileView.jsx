@@ -62,7 +62,7 @@ function ProfileView() {
         last_name: lastName,
         email,
         role,
-        ...(password && { password }),
+        password: password
       };
       const res = await fetchAPI("PUT", "/user/self", body, authKey);
       if (res.status === 200) {
