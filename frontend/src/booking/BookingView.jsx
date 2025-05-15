@@ -67,6 +67,7 @@ function BookingView() {
   }, [fetchData]);
 
   useEffect(() => {
+    if (!user) return;
     if (user?.role === "trainer") {
       setFilteredBookings(bookings); 
       return;
