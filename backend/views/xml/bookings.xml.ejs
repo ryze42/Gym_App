@@ -8,6 +8,7 @@
     
     <!ELEMENT session        (session-date)>
     <!ELEMENT session-date   (#PCDATA)>
+    <!ELEMENT session-time   (#PCDATA)>
     
     <!ELEMENT trainer        (trainer-name)>
     <!ELEMENT trainer-name   (#PCDATA)>
@@ -32,6 +33,7 @@
             const dd = String(d.getDate()).padStart(2,'0');
             return `${yyyy}-${mm}-${dd}`;
           })() %></session-date>
+          <session-time><%= session.start_time %></session-time>
       </session>
       
       <trainer>
