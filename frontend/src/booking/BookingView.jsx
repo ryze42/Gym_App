@@ -103,7 +103,7 @@ function BookingView() {
   if (error) return <p className="text-center mt-8 text-red-600">{error}</p>;
 
   return (
-    <section className="flex flex-col items-center relative p-4">
+    <section className="flex flex-col items-center relative p-4 pb-16">
       <h1 className="text-2xl font-semibold mb-4">
         My {user.role === "trainer" ? "Sessions" : "Bookings"}
       </h1>

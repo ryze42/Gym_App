@@ -140,7 +140,7 @@ function BlogPostView({ initialPosts = [] }) {
   };
 
   return (
-    <div className="text-white min-h-screen flex flex-col">
+    <div className="text-white min-h-screen flex flex-col pb-10">
       <main className="container mx-auto px-4 py-8 flex flex-col flex-1">
         <h1 className="text-2xl font-bold text-center mb-6">Blog Posts</h1>
 
