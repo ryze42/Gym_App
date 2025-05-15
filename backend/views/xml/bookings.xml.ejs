@@ -1,61 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE bookings [
-    <!ELEMENT bookings (booking*)>
+    <!ELEMENT bookings       (booking*)>
     <!ATTLIST bookings export-date CDATA "0000-00-00">
     
-    <!ELEMENT booking (booking-id, member-id, session-id, status, session, trainer, activity, location)>
-    <!ELEMENT booking-id (#PCDATA)>
-    <!ELEMENT member-id (#PCDATA)>
-    <!ELEMENT session-id (#PCDATA)>
-    <!ELEMENT status (#PCDATA)>
+    <!ELEMENT booking        (status, session, trainer, activity, location)>
+    <!ELEMENT status         (#PCDATA)>
     
-    <!ELEMENT session (session-id, session-name, session-date)>
-    <!ELEMENT session-id (#PCDATA)>
-    <!ELEMENT session-name (#PCDATA)>
-    <!ELEMENT session-date (#PCDATA)>
+    <!ELEMENT session        (session-date)>
+    <!ELEMENT session-date   (#PCDATA)>
     
-    <!ELEMENT trainer (trainer-id, trainer-name)>
-    <!ELEMENT trainer-id (#PCDATA)>
-    <!ELEMENT trainer-name (#PCDATA)>
+    <!ELEMENT trainer        (trainer-name)>
+    <!ELEMENT trainer-name   (#PCDATA)>
     
-    <!ELEMENT activity (activity-id, activity-name)>
-    <!ELEMENT activity-id (#PCDATA)>
-    <!ELEMENT activity-name (#PCDATA)>
+    <!ELEMENT activity       (activity-name)>
+    <!ELEMENT activity-name  (#PCDATA)>
     
-    <!ELEMENT location (location-id, location-name, location-address)>
-    <!ELEMENT location-id (#PCDATA)>
-    <!ELEMENT location-name (#PCDATA)>
-    <!ELEMENT location-address (#PCDATA)>
+    <!ELEMENT location       (location-name, location-address)>
+    <!ELEMENT location-name     (#PCDATA)>
+    <!ELEMENT location-address  (#PCDATA)>
 ]>
 <bookings export-date="<%= exportDate %>">
-    <% for (const {booking, session, trainer, activity, location} of bookingDetails) { %>
+  <% for (const { booking, session, trainer, activity, location } of bookingDetails) { %>
     <booking>
-        <booking-id><%= booking.id %></booking-id>
-        <member-id><%= booking.member_id %></member-id>
-        <session-id><%= booking.session_id %></session-id>
-        <status><%= booking.status %></status>
-        
-        <session>
-            <session-id><%= session.id %></session-id>
-            <session-name><%= session.name %></session-name>
-            <session-date><%= session.date %></session-date>
-        </session>
-        
-        <trainer>
-            <trainer-id><%= trainer.id %></trainer-id>
-            <trainer-name><%= trainer.name %></trainer-name>
-        </trainer>
-        
-        <activity>
-            <activity-id><%= activity.id %></activity-id>
-            <activity-name><%= activity.name %></activity-name>
-        </activity>
-        
-        <location>
-            <location-id><%= location.id %></location-id>
-            <location-name><%= location.name %></location-name>
-            <location-address><%= location.address %></location-address>
-        </location>
+      <status><%= booking.status %></status>
+      
+      <session>
+        <session-date><%= (() => {
+            const d = new Date(session.date);
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth()+1).padStart(2,'0');
+            const dd = String(d.getDate()).padStart(2,'0');
+            return `${yyyy}-${mm}-${dd}`;
+          })() %></session-date>
+      </session>
+      
+      <trainer>
+        <trainer-name><%= trainer.first_name %> <%= trainer.last_name %></trainer-name>
+      </trainer>
+      
+      <activity>
+        <activity-name><%= activity.name %></activity-name>
+      </activity>
+      
+      <location>
+        <location-name><%= location.name %></location-name>
+        <location-address><%= location.address %></location-address>
+      </location>
     </booking>
-    <% } %>
+  <% } %>
 </bookings>

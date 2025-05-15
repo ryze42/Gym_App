@@ -208,7 +208,7 @@ function BookingView() {
               &times;
             </button>
             <h2 className="text-lg font-semibold mb-4 text-black">
-              Click to Export XML file
+              Export XML file
             </h2>
             <div className="flex flex-col gap-3">
               {user.role === "trainer" ? (

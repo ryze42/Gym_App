@@ -1,54 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE sessions [
-    <!ELEMENT sessions (session*)>
+    <!ELEMENT sessions    (session*)>
     <!ATTLIST sessions export-date CDATA "0000-00-00">
     
-    <!ELEMENT session (id, activity-id, date, start-time, location-id, trainer-id, activity, location, trainer)>
-    <!ELEMENT id (#PCDATA)>
-    <!ELEMENT activity-id (#PCDATA)>
-    <!ELEMENT date (#PCDATA)>
-    <!ELEMENT start-time (#PCDATA)>
-    <!ELEMENT location-id (#PCDATA)>
-    <!ELEMENT trainer-id (#PCDATA)>
+    <!ELEMENT session     (activity, date, start-time, location, trainer)>
+    <!ELEMENT date        (#PCDATA)>
+    <!ELEMENT start-time  (#PCDATA)>
     
-    <!ELEMENT activity (id, name)>
-    <!ELEMENT id (#PCDATA)>
-    <!ELEMENT name (#PCDATA)>
+    <!ELEMENT activity    (name)>
+    <!ELEMENT name        (#PCDATA)>
     
-    <!ELEMENT location (id, name, address)>
-    <!ELEMENT id (#PCDATA)>
-    <!ELEMENT name (#PCDATA)>
-    <!ELEMENT address (#PCDATA)>
+    <!ELEMENT location    (name, address)>
+    <!ELEMENT name        (#PCDATA)>
+    <!ELEMENT address     (#PCDATA)>
     
-    <!ELEMENT trainer (id, name)>
-    <!ELEMENT id (#PCDATA)>
-    <!ELEMENT name (#PCDATA)>
+    <!ELEMENT trainer     (name)>
+    <!ELEMENT name        (#PCDATA)>
 ]>
-<sessions>
-    <% for (const {session, activity, location, trainer} of sessions) { %>
+<sessions export-date="<%= exportDate %>">
+  <% for (const { session, activity, location, trainer } of sessions) { %>
     <session>
-        <id><%= session.id %></id>
-        <activity-id><%= session.activity_id %></activity-id>
-        <date><%= session.date %></date>
-        <start-time><%= session.start_time %></start-time>
-        <location-id><%= session.location_id %></location-id>
-        <trainer-id><%= session.trainer_id %></trainer-id>
-        
-        <activity>
-            <id><%= activity.id %></id>
-            <name><%= activity.name %></name>
-        </activity>
-        
-        <location>
-            <id><%= location.id %></id>
-            <name><%= location.name %></name>
-            <address><%= location.address %></address>
-        </location>
-        
-        <trainer>
-            <id><%= trainer.id %></id>
-            <name><%= trainer.first_name %> <%= trainer.last_name %></name>
-        </trainer>
+      <activity>
+        <name><%= activity.name %></name>
+      </activity>
+      
+      <date><%= (() => {
+            const d = new Date(session.date);
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth()+1).padStart(2,'0');
+            const dd = String(d.getDate()).padStart(2,'0');
+            return `${yyyy}-${mm}-${dd}`;
+          })() %></date>
+      <start-time><%= session.start_time %></start-time>
+      
+      <location>
+        <name><%= location.name %></name>
+        <address><%= location.address %></address>
+      </location>
+      
+      <trainer>
+        <name><%= trainer.first_name %> <%= trainer.last_name %></name>
+      </trainer>
     </session>
-    <% } %>
+  <% } %>
 </sessions>
