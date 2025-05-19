@@ -3,6 +3,15 @@ import { fetchAPI } from '../api.mjs';
 import { useNavigate } from 'react-router';
 import { useAuthenticate } from '../authentication/useAuthenticate';
 
+const escapeHTML = (str) =>
+  str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .trim();
+
 function BlogPostView({ initialPosts = [] }) {
   const [blogPosts, setBlogPosts] = useState(initialPosts);
   const [subject, setSubject] = useState('');
@@ -10,6 +19,7 @@ function BlogPostView({ initialPosts = [] }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const authKey = localStorage.getItem('authKey');
   const { user } = useAuthenticate();
   const navigate = useNavigate();
@@ -25,8 +35,12 @@ function BlogPostView({ initialPosts = [] }) {
     setIsLoading(true);
     try {
       const res = await fetchAPI('GET', '/blog_posts', null, authKey);
+      if (res.status === 401) {
+        localStorage.removeItem('authKey');
+        navigate('/authenticate');
+        return;
+      }
       if (res.status && res.status !== 200) throw new Error(res.message || `Error ${res.status}`);
-      
       const posts = Array.isArray(res) ? res : res.body;
       if (!Array.isArray(posts)) throw new Error('Unexpected data format');
 
@@ -42,15 +56,17 @@ function BlogPostView({ initialPosts = [] }) {
     } catch (err) {
       console.error('Error fetching posts:', err);
       setError(err.message);
+      if (err.message.includes('401')) {
+        localStorage.removeItem('authKey');
+        navigate('/authenticate');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (authKey) {
-      fetchPosts();
-    }
+    if (authKey) fetchPosts();
   }, [authKey]);
 
   const handleSubmit = async (e) => {
@@ -58,31 +74,46 @@ function BlogPostView({ initialPosts = [] }) {
     if (!user) return;
 
     setIsSubmitting(true);
-    const newPost = { subject, content, user_id: user.id };
-    
+
+    const cleanSubject = escapeHTML(subject);
+    const cleanContent = escapeHTML(content);
+
+    if (cleanSubject.length < 3 || cleanSubject.length > 100) {
+      setError('Subject must be 3–100 characters');
+      setIsSubmitting(false);
+      return;
+    }
+    if (cleanContent.length < 10) {
+      setError('Content must be at least 10 characters');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
+      const newPost = { subject: cleanSubject, content: cleanContent, user_id: user.id };
       const response = await fetchAPI('POST', '/blog_posts', newPost, authKey);
-      const postId = response && response.body && response.body.id 
-        ? response.body.id 
-        : (response && response.id ? response.id : Date.now());
-      
+      if (response.status === 401) {
+        localStorage.removeItem('authKey');
+        navigate('/authenticate');
+        return;
+      }
+
+      const postId = response.body?.id ?? Date.now();
       const createdPost = {
         id: postId,
         user_id: user.id,
-        subject,
-        content,
+        subject: cleanSubject,
+        content: cleanContent,
         user: {
           first_name: user.first_name || user.username || 'Current',
           last_name: user.last_name || ''
-        },
-        
+        }
       };
-      
+
       setBlogPosts(prev => [createdPost, ...prev]);
       setSubject('');
       setContent('');
-      
-      console.log('Post created successfully with ID:', postId);
+      setError(null);
     } catch (err) {
       console.error('Error creating post:', err);
       setError('Error creating post: ' + (err.message || 'Unknown error'));
@@ -95,49 +126,51 @@ function BlogPostView({ initialPosts = [] }) {
     if (!window.confirm('Are you sure you want to delete this blog post?')) return;
     try {
       const response = await fetchAPI('DELETE', `/blog_posts/${id}`, null, authKey);
-      if (response) setBlogPosts(prev => prev.filter(post => post.id !== id));
+      if (response.status === 401) {
+        localStorage.removeItem('authKey');
+        navigate('/authenticate');
+        return;
+      }
+      setBlogPosts(prev => prev.filter(post => post.id !== id));
     } catch (err) {
       console.error('Error deleting post:', err);
       setError('Error deleting post: ' + (err.message || 'Unknown error'));
     }
   };
 
-  const renderBlogPost = (post) => {
-    const hasUserInfo = post.user && (post.user.first_name || post.user.last_name);
-    return (
-      <div className="card bg-white text-black shadow-md" key={post.id}>
-        <div className="card-body flex justify-between items-start">
-          <div className="space-y-1">
-            {hasUserInfo && (
-              <p className="text-sm">
-                <span className="font-semibold text-gray-700">User:</span> {post.user.first_name} {post.user.last_name}
-              </p>
-            )}
+  const renderBlogPost = (post) => (
+    <div className="card bg-white text-black shadow-md" key={post.id}>
+      <div className="card-body flex justify-between items-start">
+        <div className="space-y-1">
+          {post.user?.first_name && (
             <p className="text-sm">
-              <span className="font-semibold text-gray-700">Subject:</span> {post.subject}
+              <span className="font-semibold text-gray-700">User:</span> {post.user.first_name} {post.user.last_name}
             </p>
-            <p className="text-sm">
-              <span className="font-semibold text-gray-700">Content:</span> {post.content}
+          )}
+          <p className="text-sm">
+            <span className="font-semibold text-gray-700">Subject:</span> {post.subject}
+          </p>
+          <p className="text-sm">
+            <span className="font-semibold text-gray-700">Content:</span> {post.content}
+          </p>
+          {post.created_at && (
+            <p className="text-xs text-gray-500">
+              Posted: {new Date(post.created_at).toLocaleString()}
             </p>
-            {post.created_at && (
-              <p className="text-xs text-gray-500">
-                Posted: {new Date(post.created_at).toLocaleString()}
-              </p>
-            )}
-          </div>
-          {(user && (user.id === post.user_id || user.role === 'admin')) && (
-            <button 
-              className="btn btn-error btn-sm" 
-              onClick={() => handleDelete(post.id)} 
-              aria-label="Delete post"
-            >
-              ❌
-            </button>
           )}
         </div>
+        {(user && (user.id === post.user_id || user.role === 'admin')) && (
+          <button
+            className="btn btn-error btn-sm"
+            onClick={() => handleDelete(post.id)}
+            aria-label="Delete post"
+          >
+            ❌
+          </button>
+        )}
       </div>
-    );
-  };
+    </div>
+  );
 
   return (
     <div className="text-white min-h-screen flex flex-col pb-10">
