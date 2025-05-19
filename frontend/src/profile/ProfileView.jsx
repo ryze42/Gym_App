@@ -24,7 +24,7 @@ function ProfileView() {
     if (!authKey) {
       navigate("/authenticate");
     }
-  }, [authKey, navigate]);
+  }, [authKey, user, navigate]);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -43,32 +43,35 @@ function ProfileView() {
     } catch (err) {
       setError(err.toString());
     }
-  }, [authKey]);
+  }, [authKey, user]);
 
   useEffect(() => {
     if (authKey) {
       loadProfile();
     }
-  }, [authKey, loadProfile]);
+  }, [authKey, user, loadProfile]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
+
+    const body = {
+      id,
+      first_name: firstName,
+      last_name: lastName,
+      email,
+      role,
+      password: password
+    };
+
     try {
-      const body = {
-        id,
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        role,
-        password: password
-      };
       const res = await fetchAPI("PUT", "/user/self", body, authKey);
       if (res.status === 200) {
         setSuccess("Profile updated successfully.");
         setPassword("");
         setUpdated(true);
+        await loadProfile(user);
       } else {
         setError(res.body.message || "Update failed");
       }

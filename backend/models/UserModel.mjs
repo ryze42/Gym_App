@@ -20,7 +20,7 @@ export class UserModel extends DatabaseModel {
         this.role = role
         this.email = email
         this.password = password
-        this.authentication_key
+        this.authentication_key = authentication_key
     }
 
     /**

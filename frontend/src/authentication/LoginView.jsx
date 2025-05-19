@@ -12,14 +12,20 @@ function LoginView() {
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [error, setError] = useState(null);
+
   const navigate = useNavigate();
   const { login, status, user } = useAuthenticate();
 
+  // When status changes, handle navigation / errors
   useEffect(() => {
-    if (!isRegister && user && status === "loaded") {
+    if (isRegister) return;           // we're on the register form
+    if (status === "loaded" && user) {
       navigate("/");
+    } else if (status === "Invalid credentials") {
+      setError("Invalid email or password");
     }
-  }, [user, status, isRegister, navigate]);
+    // else ignore "resuming", "authenticating", "loading", null, etc.
+  }, [status, user, isRegister, navigate]);
 
   const toggleForms = (e) => {
     e.preventDefault();
@@ -27,22 +33,11 @@ function LoginView() {
     setIsRegister((prev) => !prev);
   };
 
-  const handleLogin = async (e) => {
+  // Simply fire-and-forget; let the effect pick up the status change.
+  const handleLogin = (e) => {
     e.preventDefault();
     setError(null);
-
-    try {
-      await login(loginEmail, loginPassword);
-      if (status !== "loaded") {
-        const msg =
-          status === "Invalid credentials"
-            ? "Invalid email or password"
-            : status || "Login failed";
-        setError(msg);
-      }
-    } catch (err) {
-      setError(err.toString());
-    }
+    login(loginEmail, loginPassword);
   };
 
   const handleRegister = async (e) => {
@@ -56,12 +51,7 @@ function LoginView() {
         email: registerEmail,
         password: registerPassword,
       };
-      const res = await fetchAPI(
-        "POST",
-        "/authenticate/register",
-        body,
-        null
-      );
+      const res = await fetchAPI("POST", "/authenticate/register", body, null);
       if (res.status === 201) {
         const loginRes = await fetchAPI(
           "POST",
@@ -90,9 +80,7 @@ function LoginView() {
           {isRegister ? "Register" : "Login"}
         </h2>
 
-        {error && (
-          <div className="alert alert-error mb-4">{error}</div>
-        )}
+        {error && <div className="alert alert-error mb-4">{error}</div>}
 
         <form
           onSubmit={isRegister ? handleRegister : handleLogin}
@@ -151,9 +139,7 @@ function LoginView() {
         </form>
 
         <p className="text-center mt-4">
-          {isRegister
-            ? "Already have an account?"
-            : "Don't have an account?"}
+          {isRegister ? "Already have an account?" : "Don't have an account?"}{" "}
           <button onClick={toggleForms} className="text-primary underline">
             {isRegister ? "Login" : "Register"}
           </button>

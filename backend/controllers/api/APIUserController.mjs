@@ -71,6 +71,8 @@ export class APIUserController {
    *         $ref: "#/components/responses/Updated"
    *       '400':
    *         $ref: "#/components/responses/Error"
+   *       '401':
+   *         $ref: "#/components/responses/Unauthorised"
    *       '500':
    *         $ref: "#/components/responses/Error"
    */

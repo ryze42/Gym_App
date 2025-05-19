@@ -272,6 +272,16 @@ components:
                 items:
                   type: string
                   example: "Invalid email address"
+    Unauthorised:
+      description: "Authentication failed or user is not logged in"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Unauthorised"
 
   requestBodies:
     UserCredentials:
