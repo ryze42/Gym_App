@@ -76,7 +76,7 @@ export class APIUserController {
    *       '500':
    *         $ref: "#/components/responses/Error"
    */
-  static async updateAuthenticatedUser(req, res) { // prefill id field, or whatever other fields to work
+  static async updateAuthenticatedUser(req, res) { 
     const user = req.authenticatedUser;
     const { first_name, last_name, email, password } = req.body;
 

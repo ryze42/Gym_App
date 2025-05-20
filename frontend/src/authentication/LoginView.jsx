@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import { useAuthenticate } from "./useAuthenticate";
 import { fetchAPI } from "../api.mjs";
 
@@ -140,6 +140,17 @@ function LoginView() {
           <button onClick={toggleForms} className="text-primary underline">
             {isRegister ? "Login" : "Register"}
           </button>
+        </p>
+
+        <p className="text-center text-sm text-gray-500 mt-2">
+          By continuing, you agree to our{' '}
+          <Link
+            to="/privacy"
+            className="text-primary underline"
+          >
+            Privacy Policy
+          </Link>
+          .
         </p>
       </div>
     </main>

@@ -9,6 +9,7 @@ import BookingView from './booking/BookingView'
 import LoginView from './authentication/LoginView'
 import ProfileView from './profile/ProfileView'
 import BlogPostView from './blog/BlogPostView'
+import PrivacyPolicyView from './common/PrivacyPolicyView'
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,7 @@ const router = createBrowserRouter([
       { path: '/authenticate', element: <LoginView /> },
       { path: '/profile', element: <ProfileView /> },
       { path: '/blog', element: <BlogPostView /> },
+      { path: '/privacy', element: <PrivacyPolicyView /> },
     ],
   },
 ]);
