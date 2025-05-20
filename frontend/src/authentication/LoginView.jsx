@@ -16,15 +16,13 @@ function LoginView() {
   const navigate = useNavigate();
   const { login, status, user } = useAuthenticate();
 
-  // When status changes, handle navigation / errors
   useEffect(() => {
-    if (isRegister) return;           // we're on the register form
+    if (isRegister) return;           
     if (status === "loaded" && user) {
       navigate("/");
     } else if (status === "Invalid credentials") {
       setError("Invalid email or password");
     }
-    // else ignore "resuming", "authenticating", "loading", null, etc.
   }, [status, user, isRegister, navigate]);
 
   const toggleForms = (e) => {
@@ -33,7 +31,6 @@ function LoginView() {
     setIsRegister((prev) => !prev);
   };
 
-  // Simply fire-and-forget; let the effect pick up the status change.
   const handleLogin = (e) => {
     e.preventDefault();
     setError(null);
