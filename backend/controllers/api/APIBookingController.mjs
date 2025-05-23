@@ -10,9 +10,7 @@ export class APIBookingController {
   static {
     this.routes.use(APIAuthenticationController.middleware);
     this.routes.get("/my", APIAuthenticationController.restrict(["member", "trainer"]),this.getMyBookings);
-    this.routes.get("/:id", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.getBookingById);
     this.routes.post("/", APIAuthenticationController.restrict(["member", "admin"]), this.createBooking);
-    this.routes.put("/:id", APIAuthenticationController.restrict(["admin"]), this.updateBooking);
     this.routes.delete("/:id",APIAuthenticationController.restrict(["admin", "member"]),this.deleteBooking);
     this.routes.get("/member/xml",APIAuthenticationController.restrict(["member"]),this.getBookingsXML);
     this.routes.get("/trainer/xml",APIAuthenticationController.restrict(["trainer"]),this.getSessionsXML);
@@ -66,42 +64,6 @@ export class APIBookingController {
   /**
    * @type {express.RequestHandler}
    * @openapi
-   * /api/bookings/{id}:
-   *   get:
-   *     summary: "Get a booking by ID"
-   *     tags: [Bookings]
-   *     security:
-   *       - ApiKey: []
-   *     parameters:
-   *       - $ref: "#/components/parameters/BookingId"
-   *     responses:
-   *       '200':
-   *         description: "Booking found"
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/Booking"
-   *       '404':
-   *         $ref: "#/components/responses/NotFound"
-   *       default:
-   *         $ref: "#/components/responses/Error"
-   */
-  static async getBookingById(req, res) {
-    try {
-      const booking = await BookingModel.getById(req.params.id);
-      if (!booking) return res.status(404).json({ message: "Booking not found" });
-      if (req.authenticatedUser.role === "member" && booking.member_id !== req.authenticatedUser.id) {
-        return res.status(403).json({ message: "Forbidden" });
-      }
-      res.status(200).json(booking);
-    } catch (err) {
-      res.status(500).json({ message: "Failed to fetch booking" });
-    }
-  }
-
-  /**
-   * @type {express.RequestHandler}
-   * @openapi
    * /api/bookings:
    *   post:
    *     summary: "Create a new booking"
@@ -134,52 +96,6 @@ export class APIBookingController {
       res.status(201).json({ id: result.insertId, message: "Item created" });
     } catch (err) {
       res.status(500).json({ message: "Failed to create booking" });
-    }
-  }
-
-  /**
-   * @type {express.RequestHandler}
-   * @openapi
-   * /api/bookings/{id}:
-   *   put:
-   *     summary: "Update a booking by ID"
-   *     tags: [Bookings]
-   *     security:
-   *       - ApiKey: []
-   *     parameters:
-   *       - $ref: "#/components/parameters/BookingId"
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             $ref: "#/components/schemas/Booking"
-   *     responses:
-   *       '200':
-   *         $ref: "#/components/responses/Updated"
-   *       '400':
-   *         $ref: "#/components/responses/Error"
-   *       '404':
-   *         $ref: "#/components/responses/NotFound"
-   *       default:
-   *         $ref: "#/components/responses/Error"
-   */
-  static async updateBooking(req, res) {
-    const id = parseInt(req.params.id, 10);
-    const { status } = req.body;
-    if (!(status === "active" || status === "cancelled")) {
-      return res.status(400).json({ message: "Invalid status" });
-    }
-    try {
-      const existing = await BookingModel.getById(id);
-      if (!existing) return res.status(404).json({ message: "Booking not found" });
-      if (req.authenticatedUser.role === "member" && existing.member_id !== req.authenticatedUser.id) {
-        return res.status(403).json({ message: "Forbidden" });
-      }
-      await BookingModel.update({ id, member_id: existing.member_id, session_id: existing.session_id, status });
-      res.status(200).json({ message: "Item updated" });
-    } catch (err) {
-      res.status(500).json({ message: "Failed to update booking" });
     }
   }
 
