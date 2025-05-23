@@ -144,11 +144,9 @@ export class APIBlogPostController {
       try {
         existing = await BlogPostModel.getById(postId);
       } catch (error) {
-        // getById rejects with "not found" when blog post doesn't exist
         if (error === "not found") {
           return res.status(404).json({ message: "Blog post not found" });
         }
-        // Re-throw if it's a different error
         throw error;
       }
 
@@ -158,7 +156,6 @@ export class APIBlogPostController {
       ) {
         return res.status(403).json({ message: "Forbidden" });
       }
-
       await BlogPostModel.delete(postId);
       res.status(200).json({ message: "Blog post deleted" });
     } catch (error) {
