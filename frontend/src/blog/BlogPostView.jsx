@@ -26,6 +26,7 @@ function BlogPostView({ initialPosts = [] }) {
 
   const subjectValid = subject.trim().length >= 3 && subject.trim().length <= 100;
   const contentValid = content.trim().length >= 10;
+  const isFormValid = subjectValid && contentValid;
 
   useEffect(() => {
     if (!authKey) navigate('/authenticate');
@@ -71,7 +72,7 @@ function BlogPostView({ initialPosts = [] }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !isFormValid || isSubmitting) return;
 
     setIsSubmitting(true);
 
@@ -233,8 +234,9 @@ function BlogPostView({ initialPosts = [] }) {
                 </button>
                 <button 
                   type="submit" 
-                  className="btn btn-primary" 
-                  disabled={!(subjectValid && contentValid) || isSubmitting}
+                  className={`btn ${isFormValid && !isSubmitting ? 'btn-primary' : 'btn-disabled bg-gray-400 text-gray-600 cursor-not-allowed'}`}
+                  disabled={!isFormValid || isSubmitting}
+                  onClick={!isFormValid || isSubmitting ? (e) => e.preventDefault() : undefined}
                 >
                   {isSubmitting ? 'Posting...' : 'Create New Blog Post'}
                 </button>
