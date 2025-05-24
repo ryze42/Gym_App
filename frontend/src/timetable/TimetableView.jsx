@@ -99,24 +99,33 @@ function TimetableView() {
   );
 
   const handleBooking = (e) => {
-    e.preventDefault();
-    const sessionId = parseInt(e.target.session_id.value, 10);
-    const memberId = user?.id;
-    if (!memberId) { alert("You must be logged in to book a session."); return; }
+  e.preventDefault();
+  const sessionId = parseInt(e.target.session_id.value, 10);
+  const memberId = user?.id;
+  if (!memberId) {
+    alert("You must be logged in to book a session.");
+    return;
+  }
 
-    const bookingData = { session_id: sessionId, member_id: memberId, status: "active" };
-    fetchAPI("POST", "/bookings", bookingData, authKey)
-      .then(response => {
-        if (response.status >= 200 && response.status < 300) {
-          alert("Booking successful!");
-          setShowModal(false);
-          setSelectedSlot(null);
-        } else {
-          alert("Booking failed: " + (response.body?.message || "Unknown error"));
-        }
-      })
-      .catch(err => alert("Error: " + (err.message || "Unknown error")));
-  };
+  const bookingData = { session_id: sessionId, member_id: memberId, status: "active" };
+  fetchAPI("POST", "/bookings", bookingData, authKey)
+    .then(response => {
+      if (response.status === 201) {
+        alert("Booking successful!");
+        getTimetable(); 
+        setShowModal(false);
+        setSelectedSlot(null);
+      } else if (response.status === 409) {
+        alert("You have already booked this session.");
+        getTimetable(); 
+        setShowModal(false);
+        setSelectedSlot(null);
+      } else {
+        alert("Booking failed: " + (response.body?.message || "Unknown error"));
+      }
+    })
+    .catch(err => alert("Error: " + (err.message || "Unknown error")));
+};
 
   return (
     <section className="flex flex-col items-center p-4 w-full max-w-4xl">
@@ -145,26 +154,40 @@ function TimetableView() {
               <h3 className="text-lg font-semibold mb-2">{activityName}</h3>
               <ul className="space-y-4">
                 {slots.map(slot => {
-                  const isBooked = slot.session.bookings?.some(booking => booking.member_id === user.id);
-                  const showButton = canBook && !isBooked;
+                  const isBooked = slot.session.bookings?.some(
+                    booking => booking.member_id === user.id
+                  );
+                  const showButton = canBook;
                   return (
                     <li key={slot.session.id} className="flex justify-between items-center p-4 border rounded-lg shadow-sm transition bg-white">
                       <div className="space-y-1">
                         <div className="font-semibold text-lg text-black">{slot.session.start_time}</div>
                         <div className="text-sm text-gray-600">📍 {slot.location.name}</div>
-                        <div className="text-sm text-gray-600">Trainers: {[...new Set(slot.trainers.map(t => `${t.first_name} ${t.last_name}`))].join(', ')}</div>
+                        <div className="text-sm text-gray-600">
+                          Trainers: {[...new Set(slot.trainers.map(t => `${t.first_name} ${t.last_name}`))].join(', ')}
+                        </div>
                       </div>
+
                       {showButton ? (
-                        <button className="btn btn-primary" onClick={() => {
-                          const sameSlotSessions = slot.sessionIds?.map((id, i) => 
-                            ({ sessionId: id, trainerName: `${slot.trainers[i].first_name} ${slot.trainers[i].last_name}` })) || [];
-                          setSelectedSlot({ ...slot, sameSlotSessions });
-                          setShowModal(true);
-                        }}>
-                          Book
-                        </button>
+                        isBooked ? (
+                          <button className="btn btn-disabled" disabled>
+                            Already Booked
+                          </button>
+                        ) : (
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => {
+                              const sameSlotSessions = slot.sessionIds?.map((id, i) =>
+                                ({ sessionId: id, trainerName: `${slot.trainers[i].first_name} ${slot.trainers[i].last_name}` })) || [];
+                              setSelectedSlot({ ...slot, sameSlotSessions });
+                              setShowModal(true);
+                            }}
+                          >
+                            Book
+                          </button>
+                        )
                       ) : (
-                        <span className="text-gray-400">{isBooked ? "Already Booked" : ""}</span>
+                        isBooked && <span className="text-gray-400">Already Booked</span>
                       )}
                     </li>
                   );

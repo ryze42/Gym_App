@@ -81,21 +81,55 @@ export class APIBookingController {
    *         $ref: "#/components/responses/Created"
    *       '400':
    *         $ref: "#/components/responses/Error"
+   *       '409':
+   *         description: "Conflict - duplicate booking"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message:
+   *                   type: string
+   *                   example: "You have already booked this session."
    *       default:
    *         $ref: "#/components/responses/Error"
    */
   static async createBooking(req, res) {
     const { session_id, status } = req.body;
     const member_id = req.authenticatedUser.id;
-    if (!Number.isInteger(session_id) || !(status === "active" || status === "cancelled")) {
+
+    if (!Number.isInteger(session_id) || !["active", "cancelled"].includes(status)) {
       return res.status(400).json({ message: "Invalid input" });
     }
     try {
-      const newBooking = { member_id, session_id, status };
-      const result = await BookingModel.create(newBooking);
-      res.status(201).json({ id: result.insertId, message: "Item created" });
+      const result = await BookingModel.query(
+        `SELECT id
+          FROM bookings
+          WHERE session_id = ?
+            AND member_id  = ?`,
+        [session_id, member_id]
+      );
+      const rows = Array.isArray(result) ? (Array.isArray(result[0]) ? result[0] : result) : [];
+
+      if (rows.length > 0) {
+        return res
+          .status(409)
+          .json({ message: "You have already booked this session." });
+      }
+      const insertResult = await BookingModel.create({ session_id, member_id, status });
+
+      return res
+        .status(201)
+        .json({ id: insertResult.insertId, message: "Booking created" });
+
     } catch (err) {
-      res.status(500).json({ message: "Failed to create booking" });
+      if (err.code === "ER_DUP_ENTRY") {
+        return res
+          .status(409)
+          .json({ message: "You have already booked this session." });
+      }
+      console.error("Error in createBooking:", err);
+      return res.status(500).json({ message: "Failed to create booking" });
     }
   }
 
