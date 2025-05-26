@@ -211,9 +211,14 @@ export class APIBlogPostController {
     const { subject, content } = req.body;
 
     try {
-      const existing = await BlogPostModel.getById(postId);
-      if (!existing) {
-        return res.status(404).json({ message: "Blog post not found" });
+      let existing;
+      try {
+        existing = await BlogPostModel.getById(postId);
+      } catch (error) {
+        if (error === "not found") {
+          return res.status(404).json({ message: "Blog post not found" });
+        }
+        throw error;
       }
 
       if (
@@ -233,6 +238,7 @@ export class APIBlogPostController {
       await BlogPostModel.patch(patchData);
       res.status(200).json({ message: "Blog post patched" });
     } catch (error) {
+      console.error(error);
       res.status(500).json({ message: "Failed to patch blog post" });
     }
   }
