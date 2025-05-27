@@ -13,6 +13,7 @@ export class APIBlogPostController {
     this.routes.post("/", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.createPost);
     this.routes.delete("/:id", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.deletePost);
     this.routes.patch("/:id", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.patchPost);
+    this.routes.put("/:id", APIAuthenticationController.restrict(["admin", "member", "trainer"]), this.updatePost);
   }
 
   /**
@@ -240,6 +241,95 @@ export class APIBlogPostController {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Failed to patch blog post" });
+    }
+  }
+
+
+  /**
+   * @type {express.RequestHandler}
+   * @openapi
+   * /api/blog_posts/{id}:
+   *   put:
+   *     summary: "Update an existing blog post by ID"
+   *     tags: [BlogPosts]
+   *     security:
+   *       - ApiKey: []
+   *     parameters:
+   *       - $ref: "#/components/parameters/BlogPostId"
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/BlogPost"
+   *     responses:
+   *       '200':
+   *         $ref: "#/components/responses/Updated"
+   *       '400':
+   *         $ref: "#/components/responses/Error"
+   *       '404':
+   *         $ref: "#/components/responses/NotFound"
+   *       default:
+   *         $ref: "#/components/responses/Error"
+   */
+  static async updatePost(req, res) {
+    const postId = req.params.id;
+    const { subject, content } = req.body;
+
+    if (!subject || !/^[\w\s\.,!?;:()\-'\"]{3,100}$/.test(subject)) {
+      return res.status(400).json({ message: "Invalid subject" });
+    }
+    if (!content || content.trim().length < 10) {
+      return res.status(400).json({ message: "Invalid content" });
+    }
+    if (content.trim().split(/\s+/).length > 1000) {
+      return res.status(400).json({ message: "Content exceeds maximum word count" });
+    }
+
+    const cleanSubject = validator.escape(subject);
+    const cleanContent = validator.escape(content);
+
+    try {
+      let existing;
+      try {
+        existing = await BlogPostModel.getById(postId);
+      } catch (err) {
+        if (err === 'not found') {
+          existing = null;
+        } else {
+          throw err;
+        }
+      }
+
+      if (!existing) {
+        const creatorId = req.authenticatedUser.id;
+        const newPost = {
+          user_id: creatorId,
+          subject: cleanSubject,
+          content: cleanContent
+        };
+        const result = await BlogPostModel.create(newPost);
+        return res.status(201).json({ id: result.insertId, message: "Item created" });
+      }
+
+      if (
+        req.authenticatedUser.id !== existing.user_id &&
+        req.authenticatedUser.role !== "admin"
+      ) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const updated = {
+        id: postId,
+        user_id: existing.user_id,
+        subject: cleanSubject,
+        content: cleanContent
+      };
+      await BlogPostModel.update(updated);
+      return res.status(200).json({ message: "Item updated" });
+    } catch (error) {
+      console.error("Upsert error:", error);
+      return res.status(500).json({ message: "Failed to upsert blog post" });
     }
   }
 }
