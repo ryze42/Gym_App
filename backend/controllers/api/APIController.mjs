@@ -31,6 +31,7 @@ const options = {
 }
 
 const specification = swaggerJSDoc(options)
+//console.log(JSON.stringify(specification))
 
 export class APIController {
     static routes = express.Router()
