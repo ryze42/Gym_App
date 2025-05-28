@@ -88,20 +88,21 @@ export class APIAuthenticationController {
                 console.error(error);
                 return res.status(500).json({ message: "Failed to authenticate user" });
             }
-        } else if (req.method === "DELETE") {
+        }  else if (req.method === "DELETE") {
             if (!req.authenticatedUser) {
-                return res.status(401).json({ message: "Not authenticated" });
+                return res.status(401).json({ message: "Please login to access the requested resource." });
             }
             try {
-                const user = await UserModel.getByAuthenticationKey(req.authenticatedUser.authenticationKey);
-                user.authenticationKey = null;
+                const user = req.authenticatedUser;
+                user.authentication_key = null;
                 await UserModel.update(user);
                 return res.status(200).json({ message: "Deauthentication successful" });
-            } catch (error) {
-                console.error(error);
+            } catch (err) {
+                console.error("Error during logout:", err);
                 return res.status(500).json({ message: "Failed to deauthenticate user" });
             }
         }
+
     }
 
     /**
