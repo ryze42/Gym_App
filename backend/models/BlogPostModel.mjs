@@ -108,6 +108,22 @@ export class BlogPostModel extends DatabaseModel {
         )
     }
 
+
+    /**
+     * Create a new blog post in database
+     * @param {BlogPostModel} blog_posts
+     * @returns {Promise<mysql.OkPacket>}
+     */
+    static createWithExistingId(blog_posts) {
+        return this.query(`
+            INSERT INTO blog_posts
+            (id, user_id, subject, content)
+            VALUES (?, ?, ?, ?)
+        `,
+            [blog_posts.id, blog_posts.user_id, blog_posts.subject, blog_posts.content]
+        )
+    }
+
     /**
      * Deletes a blog post from database by its ID.
      * @param {number} id 

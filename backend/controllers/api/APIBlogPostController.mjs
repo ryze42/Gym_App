@@ -304,11 +304,12 @@ export class APIBlogPostController {
       if (!existing) {
         const creatorId = req.authenticatedUser.id;
         const newPost = {
+          id: postId,
           user_id: creatorId,
           subject: cleanSubject,
           content: cleanContent
         };
-        const result = await BlogPostModel.create(newPost);
+        const result = await BlogPostModel.createWithExistingId(newPost);
         return res.status(201).json({ id: result.insertId, message: "Item created" });
       }
 
