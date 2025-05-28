@@ -73,13 +73,27 @@ export function useAuthenticate(restrictToRoles = null) {
     }, [setStatus, getUser])
 
     const logout = useCallback(() => {
-        fetchAPI("DELETE", "/authenticate", null, user.authenticationKey)
-            .then(response => {
-                setUser(null)
-                localStorage.removeItem("authKey")
-                setStatus(null)
-            })
-    }, [setUser, user, setStatus])
+    const authKey = localStorage.getItem("authKey")
+    if (!authKey) {
+        setUser(null)
+        setStatus(null)
+        return
+    }
+
+    fetchAPI("DELETE", "/authenticate", null, authKey)
+        .then(response => {
+        setUser(null)
+        localStorage.removeItem("authKey")
+        setStatus(null)
+        })
+        .catch(err => {
+        console.error("Logout failed:", err)
+        setUser(null)
+        localStorage.removeItem("authKey")
+        setStatus(null)
+        })
+    }, [setUser, setStatus])
+
 
     const refresh = useCallback(() => {
         getUser(user.authenticationKey)

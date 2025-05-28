@@ -102,7 +102,6 @@ export class APIAuthenticationController {
                 return res.status(500).json({ message: "Failed to deauthenticate user" });
             }
         }
-
     }
 
     /**
