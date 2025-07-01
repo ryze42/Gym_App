@@ -1,7 +1,6 @@
-```markdown
-# HSG_react
+# Gym App
 
-HSG_react is a full-stack web application that combines:
+This gym app is a full-stack web application that combines:
 
 - A **server-side rendered Node.js + Express backend** (fully functional website)  
 - A **mobile-first React + Vite frontend** SPA  
@@ -10,10 +9,10 @@ HSG_react is a full-stack web application that combines:
 
 ---
 
-## 🗂 Project Structure
+## Project Structure
 
 
-HSG\_react/
+Gym_App/
 ├── backend/                  # Fully functional SSR website (Express + Views + API)
 │   ├── controllers/          # Route logic
 │   ├── models/               # DB schema/models
@@ -40,8 +39,6 @@ HSG\_react/
 
 ---
 
-## 🚀 Getting Started
-
 ### Prerequisites
 
 - Node.js (v18+)
@@ -50,7 +47,7 @@ HSG\_react/
 
 ---
 
-## 🔧 Backend (SSR Site)
+## Backend (SSR Site)
 
 # from project root
 npm install                # if node_modules not already installed
@@ -69,7 +66,7 @@ mysql -u root -p
 
 ---
 
-## 📱 Frontend (Mobile-First React App)
+## Frontend (Mobile-First React App)
 
 # from project root
 npm install                # if node_modules not already installed
@@ -84,7 +81,7 @@ The React frontend is designed mobile-first using responsive CSS techniques. It'
 
 ---
 
-## 📖 API Documentation
+## API Documentation
 
 * API routes are documented in `OpenAPISpecification.yaml`
 * You can preview and test using:
@@ -94,19 +91,19 @@ The React frontend is designed mobile-first using responsive CSS techniques. It'
 
 ---
 
-## ✅ Features
+## Features
 
-* 🧠 Server-rendered website (backend)
-* 📱 Mobile-first, modular SPA (frontend)
-* 🔐 User authentication system
-* 📆 Timetable & booking functionality
-* 📝 Blog & profile management
-* 📊 Shared RESTful API (JSON-based)
-* 📂 MySQL persistence layer
+*  Server-rendered website (backend)
+*  Mobile-first, modular SPA (frontend)
+*  User authentication system
+*  Timetable & booking functionality
+*  Blog & profile management
+*  Shared RESTful API (JSON-based)
+*  MySQL persistence layer
 
 ---
 
-## 🛠 Scripts
+## Scripts
 
 ### Backend
 
@@ -118,7 +115,7 @@ npm -w frontend run dev     # Start Vite dev server
 
 ---
 
-## 📦 Stack Overview
+## Stack Overview
 
 ### Backend
 
@@ -138,6 +135,19 @@ npm -w frontend run dev     # Start Vite dev server
 
 ---
 
-## 📝 License
+## License
 
 MIT License. See `LICENSE` file for details.
+
+## Extras
+
+All test accounts within the database export have the password "test". 
+
+## Screenshots
+
+### Backend (Server side rendered site)
+![Home page of the server side rendered site](./docs/screenshots/backend-timetable-page.png)
+
+### Frontend (Mobile‑first React app)
+![Login page of the React app](./docs/screenshots/react-frontend-login-page.png)
+
