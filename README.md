@@ -1,3 +1,4 @@
+````markdown
 # Gym App
 
 This gym app is a full-stack web application that combines:
@@ -11,17 +12,17 @@ This gym app is a full-stack web application that combines:
 
 ## Project Structure
 
-
+```text
 Gym_App/
-├── backend/                  # Fully functional SSR website (Express + Views + API)
-│   ├── controllers/          # Route logic
-│   ├── models/               # DB schema/models
-│   ├── public/               # Static files (images, CSS, JS)
-│   ├── views/                # Server-rendered HTML/EJS templates
-│   ├── server.mjs            # Express server entry point
-│   ├── components.yaml       # API metadata
+├── backend/                     # Fully functional SSR website (Express + Views + API)
+│   ├── controllers/             # Route logic
+│   ├── models/                  # DB schema/models
+│   ├── public/                  # Static files (images, CSS, JS)
+│   ├── views/                   # Server-rendered HTML/EJS templates
+│   ├── server.mjs               # Express server entry point
+│   ├── components.yaml          # API metadata
 │   └── package.json
-├── frontend/                 # Mobile-first React SPA (Vite + React)
+├── frontend/                    # Mobile-first React SPA (Vite + React)
 │   ├── public/
 │   └── src/
 │       ├── authentication/
@@ -30,29 +31,32 @@ Gym_App/
 │       ├── common/
 │       ├── profile/
 │       └── timetable/
-├── MySqlDbExport.sql         # MySQL schema and seed data
-├── OpenAPISpecification.yaml # OpenAPI documentation
+├── MySqlDbExport.sql            # MySQL schema and seed data
+├── OpenAPISpecification.yaml    # OpenAPI documentation
+├── docs/
+│   └── screenshots/             # Place your PNGs here
 ├── .gitignore
 ├── LICENSE
 └── README.md
-
+````
 
 ---
 
 ### Prerequisites
 
-- Node.js (v18+)
-- MySQL Server
-- Git
+* Node.js (v18+)
+* MySQL Server
+* Git
 
 ---
 
 ## Backend (SSR Site)
 
+```bash
 # from project root
-npm install                # if node_modules not already installed
-npm -w backend run dev     # start backend with nodemon
-
+npm install                      # if node_modules not already installed
+npm -w backend run dev           # start backend with nodemon
+```
 
 * Starts the Express server (with nodemon)
 * Access the site: [http://localhost:8080](http://localhost:8080)
@@ -61,30 +65,34 @@ Make sure to configure your DB connection string if needed (e.g., via `.env`).
 
 ### Import the MySQL Schema
 
+```bash
 mysql -u root -p
 > source MySqlDbExport.sql
+```
 
 ---
 
-## Frontend (Mobile-First React App)
+## Frontend (Mobile-first React app)
 
+```bash
 # from project root
-npm install                # if node_modules not already installed
-npm -w frontend run dev    # start Vite dev server
+npm install                      # if node_modules not already installed
+npm -w frontend run dev          # start Vite dev server
+```
 
 * Starts Vite development server
 * Access the SPA: [http://localhost:5173](http://localhost:5173)
 
 ### Mobile-First Design
 
-The React frontend is designed mobile-first using responsive CSS techniques. It's optimized for mobile devices, with layouts progressively enhanced for larger screens.
+The React frontend is designed mobile-first using responsive CSS techniques. It’s optimized for phones and tablets, with layouts progressively enhanced for larger screens.
 
 ---
 
 ## API Documentation
 
 * API routes are documented in `OpenAPISpecification.yaml`
-* You can preview and test using:
+* Preview and test using:
 
   * [Swagger Editor](https://editor.swagger.io/)
   * Swagger UI
@@ -93,25 +101,29 @@ The React frontend is designed mobile-first using responsive CSS techniques. It'
 
 ## Features
 
-*  Server-rendered website (backend)
-*  Mobile-first, modular SPA (frontend)
-*  User authentication system
-*  Timetable & booking functionality
-*  Blog & profile management
-*  Shared RESTful API (JSON-based)
-*  MySQL persistence layer
+* Server-rendered website (backend)
+* Mobile-first, modular SPA (frontend)
+* User authentication system
+* Timetable & booking functionality
+* Blog & profile management
+* Shared RESTful API (JSON-based)
+* MySQL persistence layer
 
 ---
 
 ## Scripts
 
-### Backend
+**Backend**
 
+```bash
 npm -w backend run dev      # Start backend server with nodemon
+```
 
-### Frontend
+**Frontend**
 
+```bash
 npm -w frontend run dev     # Start Vite dev server
+```
 
 ---
 
@@ -139,15 +151,23 @@ npm -w frontend run dev     # Start Vite dev server
 
 MIT License. See `LICENSE` file for details.
 
+---
+
 ## Extras
 
-All test accounts within the database export have the password "test". 
+All test accounts within the database export have the password `test`.
+
+---
 
 ## Screenshots
 
-### Backend (Server side rendered site)
-![Home page of the server side rendered site](./docs/screenshots/backend-timetable-page.png)
+### Backend (Server-side rendered site)
 
-### Frontend (Mobile‑first React app)
-![Login page of the React app](./docs/screenshots/react-frontend-login-page.png)
+![Backend Timetable Page](docs/screenshots/backend-timetable-page.png)
 
+### Frontend (Mobile‑First React App)
+
+![React Login Page](docs/screenshots/react-frontend-login-page.png)
+
+```
+```
